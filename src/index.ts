@@ -3,8 +3,12 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const cors = require('cors');
 const app = express();
+import { authenticate } from './auth/authenticate';
+import { CmdId } from './heplers/Cmd';
 import MailRouter from './routers/mailRouter';
 import { MongoDBDatabase } from './services/database/mongodb';
+import init = require('./services/init');
+import { UserInfo } from './user/userInfo';
 
 // app.use(cors());
 app.use(express.json());
@@ -17,10 +21,6 @@ app.use(
 require('dotenv').config();
 
 const PORT = process.env.PORT || 3000;
-
-new MongoDBDatabase().connectMongoDb((_) => {
-  console.log('Mongodb Connected');
-});
 
 app.use('/mail', MailRouter);
 
@@ -39,12 +39,38 @@ server.listen(PORT, () => {
   console.log(`Server listening on port`, PORT);
 });
 
-io.sockets.on('connection', (socket) => {
-  console.info(`Client connected id = ${socket.id}`);
+init.Init().then(() => {
+  io.on('connection', (socket) => {
+    console.info(`Client connected id = ${socket.id}`);
+    let clientIp = socket.request.connection.remoteAddress;
 
-  socket.on('disconnect', () => {
-    socket.disconnect();
-    console.log(`Client gone [id=${socket.id}]`);
+    let userInfo = new UserInfo(socket);
+    console.log(clientIp);
+
+    socket.on('msg', function (msg, fn) {
+      if (msg.Name === CmdId.MOBILE_LOGIN_REQUEST) {
+        if ((<any>socket).logined) return;
+        (<any>socket).logined = true;
+        authenticate.Login(socket, msg, clientIp, userInfo, fn);
+        return;
+      }
+
+      if (userInfo.UserId) {
+        processMsg(msg, fn);
+      } else {
+        userInfo.isLogined.subscribe((_) => {
+          if (_) processMsg(msg, fn);
+        });
+      }
+    });
+
+    async function processMsg(msg, fn) {}
+
+    socket.on('disconnect', () => {
+      socket.disconnect();
+      console.log(`Client gone [id=${socket.id}]`);
+      userInfo = null;
+    });
   });
 });
 

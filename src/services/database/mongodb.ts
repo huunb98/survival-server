@@ -1,21 +1,26 @@
-import mongoose = require('mongoose');
+import mongoose, { ConnectOptions } from 'mongoose';
 import { environment } from '../../config/environment/server';
 
 export class MongoDBDatabase {
   private uri: string = `mongodb://${environment.mongo.host}:${environment.mongo.port}`;
 
-  connectMongoDb(callback: Function) {
-    mongoose.connect(
-      this.uri,
-      {
-        dbName: environment.mongo.dbName,
-        user: environment.mongo.username,
-        pass: environment.mongo.username,
-      },
-      (error) => {
-        if (error === null) callback('');
-        else console.log(error);
-      }
-    );
+  async connectAsync() {
+    const options: ConnectOptions = {
+      dbName: environment.mongo.dbName,
+      user: environment.mongo.username,
+      pass: environment.mongo.username,
+      keepAlive: true,
+    };
+
+    mongoose.connection.on('error', (err) => {
+      console.log('MongoDB error Database.ts: ' + err);
+    });
+
+    try {
+      await mongoose.connect(this.uri, options);
+      console.log('MongoDb connected ');
+    } catch (e) {
+      console.log('MongoDb error : ' + e);
+    }
   }
 }

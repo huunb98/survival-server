@@ -22,6 +22,12 @@ export enum TypeReward {
   AdminPush = 3,
 }
 
+export enum UserRole {
+  Member,
+  Tester,
+  Admin,
+}
+
 export enum MailType {
   System,
   Update,
