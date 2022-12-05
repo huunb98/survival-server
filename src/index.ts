@@ -9,7 +9,7 @@ import MailRouter from './routers/mailRouter';
 import { MongoDBDatabase } from './services/database/mongodb';
 import init = require('./services/init');
 import { UserInfo } from './user/userInfo';
-
+import socketIO = require('socket.io');
 // app.use(cors());
 app.use(express.json());
 app.use(
@@ -26,13 +26,8 @@ app.use('/mail', MailRouter);
 
 const server = http.createServer(app);
 
-const io = require('socket.io')(server, {
-  allowEIO3: true,
-  cors: {
-    origin: '',
-    methods: ['GET', 'POST'],
-    credentials: true,
-  },
+let io = socketIO(server, {
+  transports: ['websocket'],
 });
 
 server.listen(PORT, () => {
