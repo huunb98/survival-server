@@ -18,3 +18,14 @@ export enum LANGUAGE {
   Thai = 'Thai',
   'Chinese (Traditional)' = 'Chinese',
 }
+
+export enum COUNTRY_LANGUAGE {
+  US = 'English',
+  VI = 'Vietnamese',
+  RU = 'Russian',
+  FR = 'French',
+  JP = 'Japanese',
+  KR = 'Korean',
+  TH = 'Thai',
+  CH = 'Chinese',
+}

@@ -1,5 +1,5 @@
 import mongoose = require('mongoose');
-import { IPlatform, IMail } from '../heplers/catalogType';
+import { IPlatform, IMail } from '../helpers/catalogType';
 
 export interface IMailSystem {
   mail: Map<string, IMail>;

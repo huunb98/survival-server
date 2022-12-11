@@ -67,9 +67,35 @@
         socket.on('message', (msg) => {
           console.log(msg);
         });
+
+        $('#login1').click(function () {
+          console.log('on click login 1')
+          socket.emit(
+            'msg',
+            {
+              Name: 'MOBILE_LOGIN_REQUEST',
+              Body: {
+                Platform: 0,
+                DeviceId: '8f0df34f5533f508',
+                AppVersion: 101440,
+              },
+            },
+            function (e) {
+              console.log(e);
+              $('#loginButtons').hide();
+              $('#idUser').text(e.Body.RocketId);
+            }
+          );
+        });
       });
     </script>
   </head>
 
-  <body></body>
+  <body>
+    <div id="loginButtons">
+      <div>
+        <button id="login1">LOGIN 1</button>
+
+      </div>
+  </body>
 </html>

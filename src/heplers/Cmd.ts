@@ -1,3 +1,0 @@
-export const CmdId = {
-  MOBILE_LOGIN_REQUEST: 'MOBIE_LOGIN_REQUEST',
-};

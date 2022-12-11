@@ -1,5 +1,5 @@
 import mongoose = require('mongoose');
-import { TypeReward, MailStatus } from '../heplers/catalogType';
+import { TypeReward, MailStatus } from '../helpers/catalogType';
 
 export interface IMailUser {
   userId: string;
@@ -20,6 +20,7 @@ const usermailList = new mongoose.Schema({
   status: {
     type: Number,
     of: MailStatus,
+    default: MailStatus.NEW,
   },
   type: {
     type: Number,

@@ -22,7 +22,7 @@ class Authenticate {
       deviceId: deviceId,
       platform: platform,
     })
-      .populate('User')
+      .populate('user')
       .then((device) => {
         if (device) {
           OnFoundDevice(device);
@@ -34,7 +34,22 @@ class Authenticate {
         console.log(err);
       });
 
-    let OnFoundDevice = function (device: IDeviceDocument) {};
+    let OnFoundDevice = function (device: IDeviceDocument) {
+      if (device.user == null) {
+        console.log('----ERROR BI XOA USER -------------- Device ID: ' + device.deviceId + '  DeviceModel: ' + device.deviceModel);
+        fn({
+          Status: 0,
+          Error: {
+            Error: 1002,
+            ErrorMessage: 'Banned',
+          },
+        });
+        return;
+      }
+      OnLoginSuccess(device.user, device, ipAdress, userInfo).then((response) => {
+        fn(response);
+      });
+    };
 
     let CreateNewUser = async function () {
       const user = new UserModel({
@@ -76,6 +91,7 @@ async function OnLoginSuccess(user: IUserDocument, device: IDeviceDocument, ipAd
   userInfo.UserId = UserId;
   userInfo.Platform = device.platform;
   userInfo.User = user;
+  userInfo.CreatedAt = new Date(user.createdAt);
   await userInfo.OnLoginSuccess();
 
   ipLocation.SaveLocation(user._id, ipAdress, device.deviceId, userInfo);

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { IPlatform } from '../heplers/CatalogType';
+import { IPlatform } from '../helpers/CatalogType';
 import { IUserDocument } from './user';
 
 interface IDevice {

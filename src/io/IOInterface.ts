@@ -3,6 +3,12 @@ export class RequestMsg {
   Body: any;
 }
 
+export class RespsoneMsg {
+  Status: number;
+  Error?: string;
+  Body?: any;
+}
+
 export class LoginResponse {
   Status: number;
   Error?: {

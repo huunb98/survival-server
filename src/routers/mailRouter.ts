@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
-import MailCMS from '../controllers/mailCms';
+import MailCMS from '../mails/mailCms';
 
 var MailRouter = Router();
 

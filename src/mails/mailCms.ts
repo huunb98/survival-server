@@ -1,7 +1,6 @@
-import { start } from 'repl';
-import { IMail, IPlatform, MailRewardResult, MailSystemResult, MailType, MailUpdateResult, TypeReward } from '../heplers/CatalogType';
-import { LANGUAGE, LANGUAGE_TRANSLATE } from '../heplers/language';
-import Translate from '../heplers/Translate';
+import { IMail, IPlatform, MailRewardResult, MailSystemResult, MailType, MailUpdateResult, TypeReward } from '../helpers/CatalogType';
+import { LANGUAGE, LANGUAGE_TRANSLATE } from '../helpers/language';
+import Translate from '../helpers/Translate';
 import { MailUpdateModel } from '../models/mailUpdate';
 import { MailRewardModel } from '../models/MailReward';
 import { MailSystemModel } from '../models/mailSystem';

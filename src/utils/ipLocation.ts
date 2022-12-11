@@ -15,7 +15,7 @@ class IPLocation {
         }
       )
         .then(function (rowsUpdated) {
-          console.log(rowsUpdated);
+          //  console.log(rowsUpdated);
         })
         .catch((error) => console.log(error));
     } else {
@@ -39,7 +39,7 @@ class IPLocation {
         }
       )
         .then(function (rowsUpdated) {
-          console.log(rowsUpdated);
+          //    console.log(rowsUpdated);
         })
         .catch((error) => console.log(error));
 

@@ -23,6 +23,7 @@
     "http": "^0.0.1-security",
     "https": "^1.0.0",
     "mongoose": "^6.7.2",
+    "node-schedule": "^2.1.0",
     "redis": "^3.1.2",
     "rxjs": "^7.5.7",
     "socket.io": "^2.3.0"
