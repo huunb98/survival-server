@@ -1,10 +1,11 @@
 import { IMailUserDocument, UserMailListModel } from '../models/usermaillist';
 import RedisUtils from '../helpers/redisUtils';
 import { MAIL_USER } from '../mails/mailconfig';
-import { MailCachingStatus, MailSystems, MailUpdates, UserMailList } from '../mails/mailIO';
+import { GiftResponse, MailCachingStatus, MailSystems, MailUpdates, UserMailList } from '../mails/mailIO';
 import { mailManager } from '../mails/mailManager';
-import { MailType, TypeReward } from '../helpers/CatalogType';
+import { MailStatus, MailType, TypeReward } from '../helpers/CatalogType';
 import { LANGUAGE } from '../helpers/language';
+import { mailController } from '../mails';
 class UserMail {
   async loadMailPrivate(userId: string) {
     try {
@@ -17,7 +18,7 @@ class UserMail {
   }
 
   getCatchingStatus(userId: string) {
-    return new Promise<any>((resolve, reject) => {
+    return new Promise<MailCachingStatus[]>((resolve, reject) => {
       RedisUtils.GETMULTIHASHFIELD(MAIL_USER, userId, mailManager.systemId, (error: any, userStatus: MailCachingStatus[]) => {
         if (userStatus) {
           resolve(userStatus);
@@ -84,19 +85,119 @@ class UserMail {
     });
   }
 
-  getMailDetails(userId: string, mailId: string, type: MailType, language: string, callback: Function) {}
+  getMailDetails(mailId: string, type: MailType, status: MailStatus, language: string, callback: Function) {
+    switch (type) {
+      case MailType.System:
+        mailManager.getMailSystemDetail(mailId, language, status, callback);
+        break;
+      case MailType.Reward:
+        mailManager.getMailRewardDetail(mailId, language, status, callback);
+        break;
+      case MailType.Update:
+        mailManager.getMailUpdateDetail(mailId, language, status, callback);
+        break;
+    }
+  }
 
-  markMailAsReward() {}
+  markMailAsRead(userId: string, mailId: string, type: MailType, callback: Function) {
+    if (type === MailType.Reward) {
+      UserMailListModel.updateMany({ _id: mailId, status: MailStatus.NEW }, { $set: { status: MailStatus.READ } })
+        .then()
+        .catch((ex) => {
+          console.log('---------------------------------save markMailAsRead ----------------------------------' + ex.name);
+        });
+    } else this.changeStatusMailSystem(userId, mailId, MailStatus.READ);
 
-  markAllMailAsReward() {}
+    callback({});
+  }
 
-  markMailAsCollected() {}
+  async markAllMailAsRead(userId: string) {
+    UserMailListModel.updateMany({ userId: userId, status: MailStatus.NEW }, { $set: { status: MailStatus.READ } }).catch((error) =>
+      console.log('--- mark all mail as read ---', error)
+    );
+  }
 
-  markAllMailAsCollected() {}
+  markMailAsCollected(userId: string, mailId: string, type: MailType, callback: Function) {
+    if (type === MailType.Reward) {
+      UserMailListModel.updateMany({ userId: userId, status: MailStatus.NEW }, { $set: { status: MailStatus.READ } })
+        .findOne({ _id: mailId }, { gifts: 1, status: 1 })
+        .then((data) => {
+          if (data) {
+            let gift: GiftResponse[] = [];
+            if (data.status != MailStatus.COLLECTED) {
+              UserMailListModel.updateOne({ _id: data._id }, { $set: { status: MailStatus.COLLECTED } }).catch((err) => console.log(err));
+              if (data.gifts) {
+                gift = Array.from(data.gifts, function (item) {
+                  return { key: item[0], value: item[1] };
+                });
+              }
+              callback(gift);
+            } else callback([]);
+          } else callback([]);
+        })
+        .catch((ex) => {
+          console.log('---------------------------------save markMailAsCollected ----------------------------------' + ex.name);
+        });
+    } else {
+      RedisUtils.HGET(MAIL_USER + mailId, userId, (err, rs) => {
+        if (Number(rs) === MailStatus.DELETED || Number(rs) === MailStatus.COLLECTED) return callback(null, []);
 
-  deleteMail() {}
+        let mailGifts = mailManager.systemMails.get(mailId);
+        let gifts = mailGifts?.gifts;
+        let endDate = mailGifts?.endDate;
+        if (gifts && endDate) {
+          if (new Date(endDate) > new Date()) {
+            this.changeStatusMailSystem(userId, mailId, MailStatus.COLLECTED);
+            let gift: GiftResponse[] = Array.from(gifts, function (item) {
+              return { key: item[0], value: item[1] };
+            });
+            callback(null, gift);
+          } else callback(null, []);
+        } else callback(null, []);
+      });
+    }
+  }
 
-  deleteAllMail() {}
+  markAllMailAsCollected(userId: string, callback: Function) {
+    UserMailListModel.find({ userId: userId, validTo: { $gt: new Date() } }, { gifts: 1, status: 1 })
+      .then(async (data) => {
+        if (data) {
+          let gifts: GiftResponse[] = [];
+          data.forEach((index) => {
+            if (index.status != MailStatus.COLLECTED && index.gifts) {
+              let keyGift = [...index.gifts.keys()];
+              keyGift.forEach((key) => {
+                gifts.push({
+                  key: key,
+                  value: index.gifts.get(key),
+                });
+              });
+            }
+          });
+          UserMailListModel.updateMany({ userId: userId, validTo: { $gt: new Date() } }, { $set: { status: MailStatus.COLLECTED } })
+            .then()
+            .catch((err) => console.log(err));
+          callback(gifts);
+        } else {
+          callback([]);
+        }
+      })
+      .catch((ex) => {
+        console.log('------ mark all mail as collected ' + ex.name);
+      });
+  }
+
+  deleteMail(userId: string, mailId: string, type: MailType, callback: Function) {
+    if (type === MailType.Reward) this.changeStatusMailSystem(userId, mailId, MailStatus.DELETED);
+    else UserMailListModel.deleteMany({ _id: mailId }).catch((error) => console.log(error));
+    callback({});
+  }
+
+  deleteAllMail(userId: string) {
+    UserMailListModel.deleteMany({ userId: userId }).catch((ex) => {
+      console.log('------deleteAllMail-------' + ex.name);
+    });
+  }
 }
 
 export const userMail = new UserMail();

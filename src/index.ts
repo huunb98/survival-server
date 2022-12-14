@@ -6,10 +6,12 @@ const app = express();
 import { authenticate } from './auth/authenticate';
 import { CmdId } from './helpers/Cmd';
 import MailRouter from './routers/mailRouter';
-import { MongoDBDatabase } from './services/database/mongodb';
 import init = require('./services/init');
 import { UserInfo } from './user/userInfo';
 import socketIO = require('socket.io');
+import { RequestMsg } from './io/IOInterface';
+import { userInfo } from 'os';
+import { mailController } from './mails';
 // app.use(cors());
 app.use(express.json());
 app.use(
@@ -60,6 +62,14 @@ init.Init().then(() => {
     });
 
     async function processMsg(msg, fn) {}
+
+    socket.on('mail', OnMailMsg);
+
+    function OnMailMsg(msg: RequestMsg, callback) {
+      if (userInfo.UserId) {
+        mailController.processMsg(userInfo, msg, callback);
+      }
+    }
 
     socket.on('disconnect', () => {
       socket.disconnect();

@@ -78,7 +78,7 @@ class MailManager {
     } else return null;
   }
 
-  async getMailRewardDetail(mailId: string, language: string, callback: Function) {
+  async getMailRewardDetail(mailId: string, language: string, status: MailStatus, callback: Function) {
     let mailUser = await UserMailListModel.findById(mailId).exec();
 
     if (mailUser) {

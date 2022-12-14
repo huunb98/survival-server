@@ -8,7 +8,7 @@ import { RequestMsg, RespsoneMsg } from '../io/IOInterface';
 import { IMailSystemDocument } from '../models/mailSystem';
 import { UserInfo } from '../user/userInfo';
 import { MAIL_USER } from './mailconfig';
-import { MailCachingStatus, MailSystems, MailUpdates, UserMailList } from './mailIO';
+import { GiftResponse, MailCachingStatus, MailSystems, MailUpdates, UserMailList } from './mailIO';
 import { mailManager } from './mailManager';
 
 class MailController {
@@ -21,12 +21,22 @@ class MailController {
         this.getMailDetail(userInfo, msg, callback);
         break;
       case CmdId.MarkAsRead:
+        this.readMail(userInfo, msg, callback);
+        break;
+      case CmdId.MarkAsCollect:
+        this.claimMail(userInfo, msg, callback);
         break;
       case CmdId.DeleteMail:
+        this.deleteMail(userInfo, msg, callback);
         break;
       case CmdId.MarkAllAsRead:
+        this.readAllMail(userInfo, msg, callback);
+        break;
+      case CmdId.MarkAllAsCollect:
+        this.claimAllMail(userInfo, msg, callback);
         break;
       case CmdId.DeleteAllMail:
+        this.deleteAllMail(userInfo, msg, callback);
         break;
     }
   }
@@ -122,9 +132,9 @@ class MailController {
     return mail.platform === platform || mail.platform === IPlatform.All;
   }
 
-  async getMailDetail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+  getMailDetail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
     let contryCode = LANGUAGE[userInfo.CountryCode] || 'US';
-    userMail.getMailDetails(userInfo.UserId, msg.Body.MailId, msg.Body.Type, COUNTRY_LANGUAGE[contryCode], (err, result) => {
+    userMail.getMailDetails(msg.Body.MailId, msg.Body.Type, msg.Body.Status, COUNTRY_LANGUAGE[contryCode], (err, result) => {
       if (err) {
         callback({
           Status: 0,
@@ -141,14 +151,112 @@ class MailController {
     });
   }
 
-  async readMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {}
+  readMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+    userMail.markMailAsRead(userInfo.UserId, msg.Body.MailId, msg.Body.Type, (response) => {
+      callback({
+        Status: 1,
+        Body: response,
+      });
+    });
+  }
 
-  async claimMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {}
+  async readAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+    let lsMailStatus: MailCachingStatus[] = await userMail.getCatchingStatus(userInfo.UserId);
+    let mailUpdate = await this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
 
-  async deleteMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {}
+    lsMailStatus.forEach((mail) => {
+      if (mail.status === MailStatus.NEW) {
+        let startDate = mailManager.systemMails.get(mail.mailId)?.startDate;
 
-  async claimAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {}
+        if (startDate && new Date(startDate) < new Date()) userMail.changeStatusMailSystem(userInfo.UserId, mail.mailId, MailStatus.READ);
+      }
+    });
+    if (mailUpdate && mailUpdate.status === MailStatus.NEW) {
+      userMail.changeStatusMailSystem(userInfo.UserId, mailUpdate.data.id, MailStatus.READ);
+    }
+    userMail.markAllMailAsRead(userInfo.UserId);
 
-  async deleteAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {}
+    callback({
+      Status: 1,
+      Body: {},
+    });
+  }
+
+  async claimMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+    userMail.markMailAsCollected(userInfo.UserId, msg.Body.MailId, msg.Body.Type, (response) => {
+      callback({
+        Status: 1,
+        Body: response,
+      });
+    });
+  }
+
+  async deleteMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+    userMail.deleteMail(userInfo.UserId, msg.Body.MailId, msg.Body.Type, (response) => {
+      callback({
+        Status: 1,
+        Body: response,
+      });
+    });
+  }
+
+  async claimAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+    let listGiftSystem: GiftResponse[] = [];
+
+    let listStatus: MailCachingStatus[] = await userMail.getCatchingStatus(userInfo.UserId);
+    listStatus.forEach((index) => {
+      if (index.status !== MailStatus.DELETED && index.status !== MailStatus.COLLECTED) {
+        let mailSystemActive = mailManager.systemMails.get(index.mailId);
+        let giftSys = mailSystemActive.gifts;
+        let startDate = mailSystemActive.startDate;
+        let endDate = mailSystemActive.endDate;
+
+        if (giftSys && startDate && endDate) {
+          if (new Date(startDate) < new Date() && new Date(endDate) > new Date()) {
+            let keyGift = [...giftSys.keys()];
+            keyGift.forEach((key) => {
+              listGiftSystem.push({
+                key: key,
+                value: giftSys?.get(key),
+              });
+            });
+            userMail.changeStatusMailSystem(userInfo.UserId, index.mailId, MailStatus.COLLECTED);
+          }
+        }
+      }
+    });
+
+    userMail.markAllMailAsCollected(userInfo.UserId, (gifts) => {
+      gifts.push(...listGiftSystem);
+      callback({
+        Status: 1,
+        Body: {
+          data: gifts,
+        },
+      });
+    });
+  }
+
+  async deleteAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+    mailManager.systemId.forEach((mailId) => {
+      let startDate = mailManager.systemMails.get(mailId).startDate;
+      if (startDate && new Date(startDate) < new Date()) {
+        userMail.changeStatusMailSystem(userInfo.UserId, mailId, MailStatus.DELETED);
+      }
+    });
+
+    mailManager.updateId.forEach((mailId) => {
+      let startDate = mailManager.updateMails.get(mailId).startDate;
+      if (startDate && new Date(startDate) < new Date()) {
+        userMail.changeStatusMailSystem(userInfo.UserId, mailId, MailStatus.DELETED);
+      }
+    });
+    userMail.deleteAllMail(userInfo.UserId);
+
+    callback({
+      Status: 1,
+      Body: {},
+    });
+  }
 }
 export const mailController = new MailController();
