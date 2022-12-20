@@ -38,7 +38,7 @@ class UserMail {
         mailListSys.push({
           mailId: lsMailSystem[i].data.id,
           status: lsMailSystem[i].status,
-          timeEnd: Math.floor(new Date(lsMailSystem[i].data.endDate).getTime() / 1000),
+          timeEnd: Math.floor(new Date(lsMailSystem[i].data.endDate).getTime()),
           title: mailContent.title,
           type: isUpdate ? MailType.Update : MailType.System,
         });
@@ -85,18 +85,44 @@ class UserMail {
     });
   }
 
-  getMailDetails(mailId: string, type: MailType, status: MailStatus, language: string, callback: Function) {
+  getMailDetails(userId: string, mailId: string, type: MailType, language: string, callback: Function) {
+    console.log(userId, mailId, type, language);
     switch (type) {
       case MailType.System:
-        mailManager.getMailSystemDetail(mailId, language, status, callback);
+        RedisUtils.HGET(MAIL_USER + mailId, userId, (error, status) => {
+          if (status) {
+            mailManager.getMailSystemDetail(mailId, language, Number(status), callback);
+          } else {
+            mailManager.getMailSystemDetail(mailId, language, MailStatus.READ, callback);
+            this.changeStatusMailSystem(userId, mailId, MailStatus.READ);
+          }
+        });
         break;
       case MailType.Reward:
-        mailManager.getMailRewardDetail(mailId, language, status, callback);
+        mailManager.getMailRewardDetail(mailId, language, callback);
         break;
       case MailType.Update:
-        mailManager.getMailUpdateDetail(mailId, language, status, callback);
+        RedisUtils.HGET(MAIL_USER + mailId, userId, (error, status) => {
+          if (status) {
+            mailManager.getMailUpdateDetail(mailId, language, Number(status), callback);
+          } else {
+            mailManager.getMailUpdateDetail(mailId, language, MailStatus.READ, callback);
+            this.changeStatusMailSystem(userId, mailId, MailStatus.READ);
+          }
+        });
+        this.markMailAsRead(userId, mailId, MailType.Update, () => {});
         break;
     }
+  }
+
+  getStatusMailCaching(userId: string, mailId: string) {
+    return new Promise<MailStatus>((resolve, reject) => {
+      RedisUtils.HGET(MAIL_USER + mailId, userId, (getErr, status) => {
+        if (status) {
+          resolve(Number(status));
+        } else resolve(MailStatus.READ);
+      });
+    });
   }
 
   markMailAsRead(userId: string, mailId: string, type: MailType, callback: Function) {
@@ -188,7 +214,7 @@ class UserMail {
   }
 
   deleteMail(userId: string, mailId: string, type: MailType, callback: Function) {
-    if (type === MailType.Reward) this.changeStatusMailSystem(userId, mailId, MailStatus.DELETED);
+    if (type !== MailType.Reward) this.changeStatusMailSystem(userId, mailId, MailStatus.DELETED);
     else UserMailListModel.deleteMany({ _id: mailId }).catch((error) => console.log(error));
     callback({});
   }

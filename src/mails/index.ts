@@ -47,6 +47,9 @@ class MailController {
    */
   async getMailList(userInfo: UserInfo, callback: (res: RespsoneMsg) => void) {
     let listStatus: MailCachingStatus[] = await userMail.getCatchingStatus(userInfo.UserId);
+
+    //  console.log(listStatus);
+
     let lsValidMail: MailSystems[] = this.checkMailValid(listStatus, userInfo.CountryCode, userInfo.Platform);
 
     let mailUpdate = await this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
@@ -60,6 +63,7 @@ class MailController {
     if (mailUpdate) userMailList = userMailList.concat(userMail.getMailOverview(COUNTRY_LANGUAGE[contryCode], [mailUpdate], true));
     if (mailListPrivate) userMailList = userMailList.concat(await userMail.getPrivateMail(COUNTRY_LANGUAGE[contryCode], mailListPrivate));
 
+    console.log(userMailList.length);
     callback({
       Status: 1,
       Body: {
@@ -80,8 +84,9 @@ class MailController {
   private checkMailUpdate(userId: string, platform: IPlatform, appVersion: number, createdAt: Date): Promise<MailUpdates | null> {
     try {
       const mailUpdate = mailManager.updateMails.get(IPlatform.All.toString()) || mailManager.updateMails.get(platform.toString());
-      const gifts = mailUpdate.gifts;
       if (!mailUpdate) return Promise.resolve(null);
+
+      const gifts = mailUpdate.gifts;
 
       if (createdAt > new Date(mailUpdate.createdAt)) return Promise.resolve(null);
 
@@ -113,16 +118,19 @@ class MailController {
   private checkMailValid(listStatus: MailCachingStatus[], countryCode: string, platform: IPlatform) {
     let lsSystemMails: MailSystems[] = [];
 
-    mailManager.systemMails.forEach((value, index) => {
+    let systemMails = Array.from(mailManager.systemMails.values());
+
+    for (let index = 0; index < systemMails.length; index++) {
       if (listStatus[index].status !== MailStatus.DELETED) {
-        if (this.validMail(value, countryCode, platform)) {
+        if (this.validMail(systemMails[index], countryCode, platform)) {
           lsSystemMails.push({
-            data: mailManager.systemMails[index],
+            data: systemMails[index],
             status: listStatus[index].status,
           });
         }
       }
-    });
+    }
+
     return lsSystemMails;
   }
 
@@ -133,8 +141,8 @@ class MailController {
   }
 
   getMailDetail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
-    let contryCode = LANGUAGE[userInfo.CountryCode] || 'US';
-    userMail.getMailDetails(msg.Body.MailId, msg.Body.Type, msg.Body.Status, COUNTRY_LANGUAGE[contryCode], (err, result) => {
+    let countryCode = LANGUAGE[userInfo.CountryCode] || 'US';
+    userMail.getMailDetails(userInfo.UserId, msg.Body.MailId, msg.Body.Type, COUNTRY_LANGUAGE[countryCode], (err, result) => {
       if (err) {
         callback({
           Status: 0,
@@ -143,9 +151,7 @@ class MailController {
       } else {
         callback({
           Status: 1,
-          Body: {
-            data: result,
-          },
+          Body: result,
         });
       }
     });

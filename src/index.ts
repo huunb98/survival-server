@@ -10,9 +10,9 @@ import init = require('./services/init');
 import { UserInfo } from './user/userInfo';
 import socketIO = require('socket.io');
 import { RequestMsg } from './io/IOInterface';
-import { userInfo } from 'os';
 import { mailController } from './mails';
-// app.use(cors());
+
+app.use(cors());
 app.use(express.json());
 app.use(
   bodyParser.urlencoded({
@@ -63,13 +63,13 @@ init.Init().then(() => {
 
     async function processMsg(msg, fn) {}
 
-    socket.on('mail', OnMailMsg);
+    socket.on('mail', function (msg: RequestMsg, callback) {
+      console.log(msg);
 
-    function OnMailMsg(msg: RequestMsg, callback) {
       if (userInfo.UserId) {
         mailController.processMsg(userInfo, msg, callback);
       }
-    }
+    });
 
     socket.on('disconnect', () => {
       socket.disconnect();

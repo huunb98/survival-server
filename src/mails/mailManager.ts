@@ -78,14 +78,14 @@ class MailManager {
     } else return null;
   }
 
-  async getMailRewardDetail(mailId: string, language: string, status: MailStatus, callback: Function) {
+  async getMailRewardDetail(mailId: string, language: string, callback: Function) {
     let mailUser = await UserMailListModel.findById(mailId).exec();
 
     if (mailUser) {
       let gifts: GiftResponse[] = [];
       if (mailUser.gifts) {
         gifts = Array.from(mailUser.gifts, function (item) {
-          return { key: item[0], value: item[1] };
+          return { key: item[0], value: +item[1] };
         });
       }
       let timeEnd = new Date(mailUser.validTo).getTime();
@@ -142,7 +142,7 @@ class MailManager {
     let gifts: GiftResponse[] = [];
     if (mailMap.gifts) {
       gifts = Array.from(mailMap.gifts, function (item) {
-        return { key: item[0], value: item[1] };
+        return { key: item[0], value: +item[1] };
       });
     }
     if (mail) {
