@@ -12,7 +12,7 @@ import socketIO = require('socket.io');
 import { RequestMsg } from './io/IOInterface';
 import { mailController } from './mails';
 import { Server, matchMaker, RoomListingData } from 'colyseus';
-import { PVPRoom } from './pvp/PVPRoom';
+import { PVPRoom } from './pvp/PvPRoom';
 import { monitor } from '@colyseus/monitor';
 
 app.use(cors());

@@ -1,5 +1,5 @@
 import mongoose = require('mongoose');
-import { IMail, TypeReward } from '../helpers/CatalogType';
+import { IMail, TypeReward } from '../helpers/catalogType';
 
 export interface IMailReward {
   mail: Map<string, IMail>;
