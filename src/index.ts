@@ -11,6 +11,9 @@ import { UserInfo } from './user/userInfo';
 import socketIO = require('socket.io');
 import { RequestMsg } from './io/IOInterface';
 import { mailController } from './mails';
+import { Server, matchMaker, RoomListingData } from 'colyseus';
+import { PVPRoom } from './pvp/PVPRoom';
+import { monitor } from '@colyseus/monitor';
 
 app.use(cors());
 app.use(express.json());
@@ -25,6 +28,37 @@ require('dotenv').config();
 const PORT = process.env.PORT || 3000;
 
 app.use('/mail', MailRouter);
+
+app.post('/api/match', async (req: any, res) => {
+  try {
+    //let roomName = req.body.room;
+    let clientVersion = req.body.Version;
+    if (clientVersion == undefined) clientVersion = 0;
+    const roomList = await matchMaker.query({ name: 'pvp', locked: false });
+
+    let name = 'pvp';
+    let action = 2;
+
+    for (let index = 0; index < roomList.length; index++) {
+      const room = roomList[index];
+
+      const results = true;
+      if (results) {
+        name = room.roomId;
+        action = 1;
+        break;
+      }
+    }
+
+    return res.send({
+      type: action,
+      roomName: name,
+      status: 1,
+    });
+  } catch (error) {
+    return res.status(500).send('Server error!');
+  }
+});
 
 const server = http.createServer(app);
 
@@ -78,6 +112,22 @@ init.Init().then(() => {
     });
   });
 });
+
+server.define('pvp', PVPRoom);
+
+app.use(
+  '/colyseus',
+  monitor({
+    columns: [
+      'roomId',
+      'name',
+      'clients',
+      { metadata: 'spectators' }, // display 'spectators' from metadata
+      'locked',
+      'elapsedTime',
+    ],
+  })
+);
 
 server.on('error', function (e) {
   // do your thing

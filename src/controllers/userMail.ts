@@ -166,7 +166,7 @@ class UserMail {
         });
     } else {
       RedisUtils.HGET(MAIL_USER + mailId, userId, (err, rs) => {
-        if (Number(rs) === MailStatus.DELETED || Number(rs) === MailStatus.COLLECTED) return callback(null, []);
+        if (Number(rs) === MailStatus.DELETED || Number(rs) === MailStatus.COLLECTED) return callback([]);
 
         let mailGifts = mailManager.systemMails.get(mailId);
         let gifts = mailGifts?.gifts;
@@ -175,11 +175,11 @@ class UserMail {
           if (new Date(endDate) > new Date()) {
             this.changeStatusMailSystem(userId, mailId, MailStatus.COLLECTED);
             let gift: GiftResponse[] = Array.from(gifts, function (item) {
-              return { key: item[0], value: item[1] };
+              return { key: item[0], value: +item[1] };
             });
-            callback(null, gift);
-          } else callback(null, []);
-        } else callback(null, []);
+            callback(gift);
+          } else callback([]);
+        } else callback([]);
       });
     }
   }

@@ -236,9 +236,7 @@ class MailController {
       gifts.push(...listGiftSystem);
       callback({
         Status: 1,
-        Body: {
-          data: gifts,
-        },
+        Body: gifts,
       });
     });
   }
