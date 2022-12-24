@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+
+    <style>
+      body {
+        font-family: Tahoma, Geneva, sans-serif;
+      }
+    </style>
+
+    <!-- colyseus.js client -->
+    <script type="text/javascript" src="https://unpkg.com/colyseus.js@^0.14.0/dist/colyseus.js"></script>
+
+    <style type="text/css">
+      .player {
+        width: 100px;
+        height: 100px;
+        position: absolute;
+        padding-top: 24px;
+        box-sizing: border-box;
+        left: 0;
+        top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      <a href="https://github.com/colyseus/colyseus-examples"></a>
+    </h1>
+
+    <p>Test PVP</p>
+
+    <strong>Room</strong><br />
+    <input type="text" id="kill" />
+    <button onclick="getKillBoss()" style="width: 200px">Top Kill</button>
+    <br />
+    <input type="text" id="bossinfo" />
+    <button onclick="getSsInfo()" style="width: 200px">SS info</button>
+    <br />
+    <input type="text" id="topBossId" />
+    <button onclick="getTopBoss()" style="width: 200px">Top Boss</button>
+    <br />
+    <input type="text" id="rocketid" />
+    <button onclick="start()" style="width: 200px">Start With RocketID</button>
+    <br />
+    <input type="number" id="score" />
+    <button onclick="sendScore()" style="width: 200px">Send Score</button>
+    <br />
+    <br />
+    <button onclick="endGame()" style="width: 380px">End Game</button>
+    <br />
+
+    <br />
+    <script>
+      var client = new Colyseus.Client('ws://localhost:2568');
+      var room;
+      client.joinOrCreate('pvp').then((room_instance) => {
+        room = room_instance;
+
+        var players = {};
+
+        // listen to patches coming from the server
+
+        room.onMessage('START_WORLDBOSS', (message) => {
+          console.log(message);
+        });
+        room.onMessage('GET_SEASON_INFO', (message) => {
+          console.table(message);
+        });
+        room.onMessage('GET_TOP_KILLBOSS', (message) => {
+          console.table(message);
+        });
+        room.onMessage('GET_TOP_WORLDBOSS', (message) => {
+          console.table(message);
+        });
+        room.onLeave((code) => {
+          console.log(code);
+          console.log("You've been disconnected.");
+        });
+      });
+
+      function start() {
+        const rocketID = document.getElementById('rocketid').value;
+        console.log(rocketID);
+        room.send('START_WORLDBOSS', {
+          DisplayName: 'TEST',
+          Atk: 100,
+          Level: 50,
+          AvatarUrl: 'ao|f1',
+          RocketId: rocketID,
+          CountryCode: 'VN',
+          TankId: '12313axasd',
+          TotalPlayed: 1,
+        });
+      }
+
+      function getSsInfo() {
+        const start = document.getElementById('bossinfo').value;
+        room.send('GET_SEASON_INFO', {
+          LastSeason: 10,
+        });
+      }
+      function getTopBoss() {
+        const rocketID = document.getElementById('topBossId').value;
+        room.send('GET_TOP_WORLDBOSS', {
+          startPosition: 0,
+          RocketId: rocketID,
+        });
+      }
+      function getKillBoss() {
+        const start = document.getElementById('kill').value;
+        room.send('GET_TOP_KILLBOSS', {
+          startPosition: 0,
+        });
+      }
+
+      function sendScore() {
+        const score = document.getElementById('score').value;
+        room.send('SEND_GAME_SCORE', {
+          Score: Number(score),
+        });
+      }
+      function endGame() {
+        room.send('END_GAME');
+      }
+    </script>
+  </body>
+</html>

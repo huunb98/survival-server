@@ -14,6 +14,9 @@ import { mailController } from './mails';
 import { Server, matchMaker, RoomListingData } from 'colyseus';
 import { PVPRoom } from './pvp/PvPRoom';
 import { monitor } from '@colyseus/monitor';
+import { environment } from './config/environment/server';
+import { leaderboardManager } from './leaderboard/leaderboardManager';
+import { allowedNodeEnvironmentFlags } from 'process';
 
 app.use(cors());
 app.use(express.json());
@@ -25,12 +28,11 @@ app.use(
 );
 require('dotenv').config();
 
-const PORT = process.env.PORT || 3000;
-
 app.use('/mail', MailRouter);
 
 app.post('/api/match', async (req: any, res) => {
   try {
+    console.log(req.body);
     //let roomName = req.body.room;
     let clientVersion = req.body.Version;
     if (clientVersion == undefined) clientVersion = 0;
@@ -66,9 +68,18 @@ let io = socketIO(server, {
   transports: ['websocket'],
 });
 
-server.listen(PORT, () => {
-  console.log(`Server listening on port`, PORT);
+let gameServer = new Server({
+  pingInterval: 1500,
+  pingMaxRetries: 5,
 });
+
+gameServer.define('pvp', PVPRoom);
+gameServer.listen(environment.server.colyseus);
+
+server.listen(environment.server.port, () => {
+  console.log(`Server http, socket listening on port`, environment.server.port);
+});
+console.log(`Server colyseus on ws://localhost:${environment.server.colyseus}`);
 
 init.Init().then(() => {
   io.on('connection', (socket) => {
@@ -95,7 +106,16 @@ init.Init().then(() => {
       }
     });
 
-    async function processMsg(msg, fn) {}
+    async function processMsg(msg, fn) {
+      switch (msg.Name) {
+        case CmdId.GET_TOPSCORE_PVP:
+          leaderboardManager.GetSimpeLeaderBoard(userInfo, msg, fn);
+          break;
+        case CmdId.GET_PVP_INFO:
+          leaderboardManager.GetPvPInfo(userInfo, msg, fn);
+          break;
+      }
+    }
 
     socket.on('mail', function (msg: RequestMsg, callback) {
       console.log(msg);
@@ -112,8 +132,6 @@ init.Init().then(() => {
     });
   });
 });
-
-server.define('pvp', PVPRoom);
 
 app.use(
   '/colyseus',

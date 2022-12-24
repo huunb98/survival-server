@@ -1,6 +1,8 @@
 import { redisClient } from '../services/database/redis';
 
 export = {
+  redisClient: redisClient,
+
   SETKEY: function (key: string, userID: string, callback: any) {
     redisClient.SADD(key, userID, (err, rs) => {
       if (rs) {
@@ -18,24 +20,24 @@ export = {
     });
   },
 
-  HGET: function (key: string, userID: string, callback: any) {
-    redisClient.HGET(key, userID, (err, rs) => {
+  HGET: function (key: string, member: string, callback: any) {
+    redisClient.HGET(key, member, (err, rs) => {
       if (rs) callback('', rs);
       else callback(err, '');
     });
   },
 
-  HDEL: function (key: string, userID: string, callback: any) {
-    redisClient.HDEL(key, userID, (err, rs) => {
+  HDEL: function (key: string, member: string, callback: any) {
+    redisClient.HDEL(key, member, (err, rs) => {
       if (rs) callback('', rs);
       else callback(err, '');
     });
   },
 
-  GETMULTIHASHFIELD: function (key: string, userID: string, mailId: string[], callback: any) {
+  GETMULTIHASHFIELD: function (key: string, member: string, mailId: string[], callback: any) {
     let transactions = redisClient.multi();
     mailId.forEach((id) => {
-      transactions.HGET(key + id, userID);
+      transactions.HGET(key + id, member);
     });
     transactions.exec((err, rs) => {
       if (rs) {
@@ -79,5 +81,13 @@ export = {
         if (err) console.log(err);
       });
     });
+  },
+
+  SetMultiLeaderBoard(key: string, lsKey: string[], lsValue: any[]) {
+    let transaction = redisClient.multi();
+    for (let i = 0; i < lsKey.length; i++) {
+      transaction.HSET(key, lsKey[i], lsValue[i]);
+    }
+    transaction.exec();
   },
 };

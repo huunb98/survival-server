@@ -1,5 +1,5 @@
 import { IPVersion } from 'net';
-import { userMail } from '../controllers/userMail';
+import { userMail } from './userMail';
 import { IPlatform, MailStatus } from '../helpers/CatalogType';
 import { CmdId } from '../helpers/Cmd';
 import { COUNTRY_LANGUAGE, LANGUAGE } from '../helpers/language';

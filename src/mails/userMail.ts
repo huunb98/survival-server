@@ -1,11 +1,11 @@
 import { IMailUserDocument, UserMailListModel } from '../models/usermaillist';
 import RedisUtils from '../helpers/redisUtils';
-import { MAIL_USER } from '../mails/mailconfig';
-import { GiftResponse, MailCachingStatus, MailSystems, MailUpdates, UserMailList } from '../mails/mailIO';
-import { mailManager } from '../mails/mailManager';
+import { MAIL_USER } from './mailconfig';
+import { GiftResponse, MailCachingStatus, MailSystems, MailUpdates, UserMailList } from './mailIO';
+import { mailManager } from './mailManager';
 import { MailStatus, MailType, TypeReward } from '../helpers/CatalogType';
 import { LANGUAGE } from '../helpers/language';
-import { mailController } from '../mails';
+import { mailController } from '.';
 class UserMail {
   async loadMailPrivate(userId: string) {
     try {

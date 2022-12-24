@@ -2,7 +2,8 @@ require('dotenv').config();
 
 export const environment = {
   server: {
-    port: process.env.PORT,
+    port: +process.env.PORT || 3000,
+    colyseus: +process.env.COLYSEUS_PORT || 4000,
   },
   redis: {
     host: process.env.REDIS_HOST,

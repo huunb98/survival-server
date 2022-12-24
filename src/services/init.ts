@@ -1,3 +1,4 @@
+import { leaderboardManager } from '../leaderboard/leaderboardManager';
 import { mailManager } from '../mails/mailManager';
 import { MongoDBDatabase } from './database/mongodb';
 
@@ -6,5 +7,6 @@ export = {
     await new MongoDBDatabase().connectAsync();
 
     mailManager.getMailConfig();
+    leaderboardManager.initLeaderboard();
   },
 };

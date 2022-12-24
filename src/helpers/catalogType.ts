@@ -64,3 +64,15 @@ export class MailUpdateResult {
   startDate: Date;
   endDate: Date;
 }
+
+export interface IUserRank {
+  Score: number;
+  RankNumber: number;
+}
+
+export interface TopBPResponse {
+  RankNumber: number;
+  UserId: string;
+  Score: number;
+  PlayerData: any;
+}

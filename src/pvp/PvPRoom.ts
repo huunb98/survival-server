@@ -30,6 +30,7 @@ export class PVPRoom extends Room<PVPState> {
   }
 
   onCreate(options: any) {
+    console.log('on create room');
     this.setSeatReservationTime(300);
     this.PlayTime = PVPTimerConfig.TimePlay;
 
@@ -56,6 +57,7 @@ export class PVPRoom extends Room<PVPState> {
         }
         //thêm dk 30s không tìm được người chơi thì đóng room;
         this.TimeDisposeRoom--;
+        console.log(this.TimeDisposeRoom);
         if (this.TimeDisposeRoom < 0) {
           subscribe.unsubscribe();
           this.disconnect();
