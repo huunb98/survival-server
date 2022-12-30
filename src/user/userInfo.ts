@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
 import { IPlatform } from '../helpers/CatalogType';
 import { IDeviceDocument } from '../models/device';
-import { IUserDocument } from '../models/user';
+import { IUserDocument, UserModel } from '../models/user';
 import { Subject } from 'rxjs';
 
 export class UserInfo {

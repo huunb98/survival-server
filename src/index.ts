@@ -16,7 +16,7 @@ import { PVPRoom } from './pvp/PvPRoom';
 import { monitor } from '@colyseus/monitor';
 import { environment } from './config/environment/server';
 import { leaderboardManager } from './leaderboard/leaderboardManager';
-import { allowedNodeEnvironmentFlags } from 'process';
+import { userService } from './user/userService';
 
 app.use(cors());
 app.use(express.json());
@@ -108,6 +108,9 @@ init.Init().then(() => {
 
     async function processMsg(msg, fn) {
       switch (msg.Name) {
+        case CmdId.SET_NAME:
+          userService.SetName(userInfo, msg, fn);
+          break;
         case CmdId.GET_TOPSCORE_PVP:
           leaderboardManager.GetSimpeLeaderBoard(userInfo, msg, fn);
           break;
