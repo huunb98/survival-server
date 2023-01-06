@@ -15,4 +15,4 @@ exports.CmdId = {
     MarkAllAsCollect: '6007',
     DeleteAllMail: '6008',
 };
-//# sourceMappingURL=cmd.js.map
+//# sourceMappingURL=Cmd.js.map

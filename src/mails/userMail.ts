@@ -3,7 +3,7 @@ import RedisUtils from '../helpers/redisUtils';
 import { MAIL_USER } from './mailconfig';
 import { GiftResponse, MailCachingStatus, MailSystems, MailUpdates, UserMailList } from './mailIO';
 import { mailManager } from './mailManager';
-import { MailStatus, MailType, TypeReward } from '../helpers/CatalogType';
+import { MailStatus, MailType, TypeReward } from '../helpers/catalogType';
 import { LANGUAGE } from '../helpers/language';
 import { mailController } from '.';
 class UserMail {

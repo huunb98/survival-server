@@ -4,7 +4,7 @@ const http = require('http');
 const cors = require('cors');
 const app = express();
 import { authenticate } from './auth/authenticate';
-import { CmdId } from './helpers/cmd';
+import { CmdId } from './helpers/Cmd';
 import MailRouter from './routers/mailRouter';
 import init = require('./services/init');
 import { UserInfo } from './user/userInfo';

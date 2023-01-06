@@ -24,7 +24,7 @@ const usermaillist_1 = require("../models/usermaillist");
 const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
 const mailconfig_1 = require("./mailconfig");
 const mailManager_1 = require("./mailManager");
-const CatalogType_1 = require("../helpers/CatalogType");
+const catalogType_1 = require("../helpers/catalogType");
 class UserMail {
     loadMailPrivate(userId) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -61,7 +61,7 @@ class UserMail {
                     status: lsMailSystem[i].status,
                     timeEnd: Math.floor(new Date(lsMailSystem[i].data.endDate).getTime()),
                     title: mailContent.title,
-                    type: isUpdate ? CatalogType_1.MailType.Update : CatalogType_1.MailType.System,
+                    type: isUpdate ? catalogType_1.MailType.Update : catalogType_1.MailType.System,
                 });
             }
         }
@@ -77,14 +77,14 @@ class UserMail {
                     const mail = lsMail_1_1.value;
                     const timeEnd = new Date(mail.validTo).getTime();
                     switch (mail.type) {
-                        case CatalogType_1.TypeReward.AdminPush:
+                        case catalogType_1.TypeReward.AdminPush:
                             let title = mail.title;
                             mailListPrivate.push({
                                 mailId: mail._id,
                                 status: mail.status,
                                 timeEnd: timeEnd,
                                 title: title ? title : '',
-                                type: CatalogType_1.MailType.Reward,
+                                type: catalogType_1.MailType.Reward,
                             });
                             break;
                         default:
@@ -95,7 +95,7 @@ class UserMail {
                                     status: mail.status,
                                     timeEnd: timeEnd,
                                     title: mailContent.title,
-                                    type: CatalogType_1.MailType.Reward,
+                                    type: catalogType_1.MailType.Reward,
                                 });
                             }
                     }
@@ -120,31 +120,31 @@ class UserMail {
     getMailDetails(userId, mailId, type, language, callback) {
         console.log(userId, mailId, type, language);
         switch (type) {
-            case CatalogType_1.MailType.System:
+            case catalogType_1.MailType.System:
                 redisUtils_1.default.HGET(mailconfig_1.MAIL_USER + mailId, userId, (error, status) => {
                     if (status) {
                         mailManager_1.mailManager.getMailSystemDetail(mailId, language, Number(status), callback);
                     }
                     else {
-                        mailManager_1.mailManager.getMailSystemDetail(mailId, language, CatalogType_1.MailStatus.READ, callback);
-                        this.changeStatusMailSystem(userId, mailId, CatalogType_1.MailStatus.READ);
+                        mailManager_1.mailManager.getMailSystemDetail(mailId, language, catalogType_1.MailStatus.READ, callback);
+                        this.changeStatusMailSystem(userId, mailId, catalogType_1.MailStatus.READ);
                     }
                 });
                 break;
-            case CatalogType_1.MailType.Reward:
+            case catalogType_1.MailType.Reward:
                 mailManager_1.mailManager.getMailRewardDetail(mailId, language, callback);
                 break;
-            case CatalogType_1.MailType.Update:
+            case catalogType_1.MailType.Update:
                 redisUtils_1.default.HGET(mailconfig_1.MAIL_USER + mailId, userId, (error, status) => {
                     if (status) {
                         mailManager_1.mailManager.getMailUpdateDetail(mailId, language, Number(status), callback);
                     }
                     else {
-                        mailManager_1.mailManager.getMailUpdateDetail(mailId, language, CatalogType_1.MailStatus.READ, callback);
-                        this.changeStatusMailSystem(userId, mailId, CatalogType_1.MailStatus.READ);
+                        mailManager_1.mailManager.getMailUpdateDetail(mailId, language, catalogType_1.MailStatus.READ, callback);
+                        this.changeStatusMailSystem(userId, mailId, catalogType_1.MailStatus.READ);
                     }
                 });
-                this.markMailAsRead(userId, mailId, CatalogType_1.MailType.Update, () => { });
+                this.markMailAsRead(userId, mailId, catalogType_1.MailType.Update, () => { });
                 break;
         }
     }
@@ -155,36 +155,36 @@ class UserMail {
                     resolve(Number(status));
                 }
                 else
-                    resolve(CatalogType_1.MailStatus.READ);
+                    resolve(catalogType_1.MailStatus.READ);
             });
         });
     }
     markMailAsRead(userId, mailId, type, callback) {
-        if (type === CatalogType_1.MailType.Reward) {
-            usermaillist_1.UserMailListModel.updateMany({ _id: mailId, status: CatalogType_1.MailStatus.NEW }, { $set: { status: CatalogType_1.MailStatus.READ } })
+        if (type === catalogType_1.MailType.Reward) {
+            usermaillist_1.UserMailListModel.updateMany({ _id: mailId, status: catalogType_1.MailStatus.NEW }, { $set: { status: catalogType_1.MailStatus.READ } })
                 .then()
                 .catch((ex) => {
                 console.log('---------------------------------save markMailAsRead ----------------------------------' + ex.name);
             });
         }
         else
-            this.changeStatusMailSystem(userId, mailId, CatalogType_1.MailStatus.READ);
+            this.changeStatusMailSystem(userId, mailId, catalogType_1.MailStatus.READ);
         callback({});
     }
     markAllMailAsRead(userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            usermaillist_1.UserMailListModel.updateMany({ userId: userId, status: CatalogType_1.MailStatus.NEW }, { $set: { status: CatalogType_1.MailStatus.READ } }).catch((error) => console.log('--- mark all mail as read ---', error));
+            usermaillist_1.UserMailListModel.updateMany({ userId: userId, status: catalogType_1.MailStatus.NEW }, { $set: { status: catalogType_1.MailStatus.READ } }).catch((error) => console.log('--- mark all mail as read ---', error));
         });
     }
     markMailAsCollected(userId, mailId, type, callback) {
-        if (type === CatalogType_1.MailType.Reward) {
-            usermaillist_1.UserMailListModel.updateMany({ userId: userId, status: CatalogType_1.MailStatus.NEW }, { $set: { status: CatalogType_1.MailStatus.READ } })
+        if (type === catalogType_1.MailType.Reward) {
+            usermaillist_1.UserMailListModel.updateMany({ userId: userId, status: catalogType_1.MailStatus.NEW }, { $set: { status: catalogType_1.MailStatus.READ } })
                 .findOne({ _id: mailId }, { gifts: 1, status: 1 })
                 .then((data) => {
                 if (data) {
                     let gift = [];
-                    if (data.status != CatalogType_1.MailStatus.COLLECTED) {
-                        usermaillist_1.UserMailListModel.updateOne({ _id: data._id }, { $set: { status: CatalogType_1.MailStatus.COLLECTED } }).catch((err) => console.log(err));
+                    if (data.status != catalogType_1.MailStatus.COLLECTED) {
+                        usermaillist_1.UserMailListModel.updateOne({ _id: data._id }, { $set: { status: catalogType_1.MailStatus.COLLECTED } }).catch((err) => console.log(err));
                         if (data.gifts) {
                             gift = Array.from(data.gifts, function (item) {
                                 return { key: item[0], value: item[1] };
@@ -204,14 +204,14 @@ class UserMail {
         }
         else {
             redisUtils_1.default.HGET(mailconfig_1.MAIL_USER + mailId, userId, (err, rs) => {
-                if (Number(rs) === CatalogType_1.MailStatus.DELETED || Number(rs) === CatalogType_1.MailStatus.COLLECTED)
+                if (Number(rs) === catalogType_1.MailStatus.DELETED || Number(rs) === catalogType_1.MailStatus.COLLECTED)
                     return callback([]);
                 let mailGifts = mailManager_1.mailManager.systemMails.get(mailId);
                 let gifts = mailGifts === null || mailGifts === void 0 ? void 0 : mailGifts.gifts;
                 let endDate = mailGifts === null || mailGifts === void 0 ? void 0 : mailGifts.endDate;
                 if (gifts && endDate) {
                     if (new Date(endDate) > new Date()) {
-                        this.changeStatusMailSystem(userId, mailId, CatalogType_1.MailStatus.COLLECTED);
+                        this.changeStatusMailSystem(userId, mailId, catalogType_1.MailStatus.COLLECTED);
                         let gift = Array.from(gifts, function (item) {
                             return { key: item[0], value: +item[1] };
                         });
@@ -231,7 +231,7 @@ class UserMail {
             if (data) {
                 let gifts = [];
                 data.forEach((index) => {
-                    if (index.status != CatalogType_1.MailStatus.COLLECTED && index.gifts) {
+                    if (index.status != catalogType_1.MailStatus.COLLECTED && index.gifts) {
                         let keyGift = [...index.gifts.keys()];
                         keyGift.forEach((key) => {
                             gifts.push({
@@ -241,7 +241,7 @@ class UserMail {
                         });
                     }
                 });
-                usermaillist_1.UserMailListModel.updateMany({ userId: userId, validTo: { $gt: new Date() } }, { $set: { status: CatalogType_1.MailStatus.COLLECTED } })
+                usermaillist_1.UserMailListModel.updateMany({ userId: userId, validTo: { $gt: new Date() } }, { $set: { status: catalogType_1.MailStatus.COLLECTED } })
                     .then()
                     .catch((err) => console.log(err));
                 callback(gifts);
@@ -255,8 +255,8 @@ class UserMail {
         });
     }
     deleteMail(userId, mailId, type, callback) {
-        if (type !== CatalogType_1.MailType.Reward)
-            this.changeStatusMailSystem(userId, mailId, CatalogType_1.MailStatus.DELETED);
+        if (type !== catalogType_1.MailType.Reward)
+            this.changeStatusMailSystem(userId, mailId, catalogType_1.MailStatus.DELETED);
         else
             usermaillist_1.UserMailListModel.deleteMany({ _id: mailId }).catch((error) => console.log(error));
         callback({});

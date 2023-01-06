@@ -1,4 +1,4 @@
-import { MailStatus, MailType } from '../helpers/CatalogType';
+import { MailStatus, MailType } from '../helpers/catalogType';
 import { IMailSystemDocument } from '../models/mailSystem';
 import { INofityDocument } from '../models/mailUpdate';
 

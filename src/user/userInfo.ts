@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { IPlatform } from '../helpers/CatalogType';
+import { IPlatform } from '../helpers/catalogType';
 import { IDeviceDocument } from '../models/device';
 import { IUserDocument, UserModel } from '../models/user';
 import { Subject } from 'rxjs';

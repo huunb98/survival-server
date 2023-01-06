@@ -14,8 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mailController = void 0;
 const userMail_1 = require("./userMail");
-const CatalogType_1 = require("../helpers/CatalogType");
-const cmd_1 = require("../helpers/cmd");
+const catalogType_1 = require("../helpers/catalogType");
+const Cmd_1 = require("../helpers/Cmd");
 const language_1 = require("../helpers/language");
 const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
 const mailconfig_1 = require("./mailconfig");
@@ -24,28 +24,28 @@ class MailController {
     processMsg(userInfo, msg, callback) {
         return __awaiter(this, void 0, void 0, function* () {
             switch (msg.Name) {
-                case cmd_1.CmdId.GetMailList:
+                case Cmd_1.CmdId.GetMailList:
                     this.getMailList(userInfo, callback);
                     break;
-                case cmd_1.CmdId.GetMailDetail:
+                case Cmd_1.CmdId.GetMailDetail:
                     this.getMailDetail(userInfo, msg, callback);
                     break;
-                case cmd_1.CmdId.MarkAsRead:
+                case Cmd_1.CmdId.MarkAsRead:
                     this.readMail(userInfo, msg, callback);
                     break;
-                case cmd_1.CmdId.MarkAsCollect:
+                case Cmd_1.CmdId.MarkAsCollect:
                     this.claimMail(userInfo, msg, callback);
                     break;
-                case cmd_1.CmdId.DeleteMail:
+                case Cmd_1.CmdId.DeleteMail:
                     this.deleteMail(userInfo, msg, callback);
                     break;
-                case cmd_1.CmdId.MarkAllAsRead:
+                case Cmd_1.CmdId.MarkAllAsRead:
                     this.readAllMail(userInfo, msg, callback);
                     break;
-                case cmd_1.CmdId.MarkAllAsCollect:
+                case Cmd_1.CmdId.MarkAllAsCollect:
                     this.claimAllMail(userInfo, msg, callback);
                     break;
-                case cmd_1.CmdId.DeleteAllMail:
+                case Cmd_1.CmdId.DeleteAllMail:
                     this.deleteAllMail(userInfo, msg, callback);
                     break;
             }
@@ -89,7 +89,7 @@ class MailController {
      */
     checkMailUpdate(userId, platform, appVersion, createdAt) {
         try {
-            const mailUpdate = mailManager_1.mailManager.updateMails.get(CatalogType_1.IPlatform.All.toString()) || mailManager_1.mailManager.updateMails.get(platform.toString());
+            const mailUpdate = mailManager_1.mailManager.updateMails.get(catalogType_1.IPlatform.All.toString()) || mailManager_1.mailManager.updateMails.get(platform.toString());
             if (!mailUpdate)
                 return Promise.resolve(null);
             const gifts = mailUpdate.gifts;
@@ -107,12 +107,12 @@ class MailController {
             else if (appVersion >= mailUpdate.minVersion && appVersion < mailUpdate.version) {
                 redisUtils_1.default.HGET(mailconfig_1.MAIL_USER + mailUpdate.id, userId, (error, status) => {
                     if (status) {
-                        if (status === CatalogType_1.MailStatus.DELETED)
+                        if (status === catalogType_1.MailStatus.DELETED)
                             return Promise.resolve(null);
                         else
                             return Promise.resolve({
                                 data: mailUpdate,
-                                status: CatalogType_1.MailStatus.NEW,
+                                status: catalogType_1.MailStatus.NEW,
                             });
                     }
                 });
@@ -129,7 +129,7 @@ class MailController {
         let lsSystemMails = [];
         let systemMails = Array.from(mailManager_1.mailManager.systemMails.values());
         for (let index = 0; index < systemMails.length; index++) {
-            if (listStatus[index].status !== CatalogType_1.MailStatus.DELETED) {
+            if (listStatus[index].status !== catalogType_1.MailStatus.DELETED) {
                 if (this.validMail(systemMails[index], countryCode, platform)) {
                     lsSystemMails.push({
                         data: systemMails[index],
@@ -143,7 +143,7 @@ class MailController {
     validMail(mail, countryCode, platform) {
         if (mail.countryCode.length && !mail.countryCode.includes(countryCode))
             return false;
-        return mail.platform === platform || mail.platform === CatalogType_1.IPlatform.All;
+        return mail.platform === platform || mail.platform === catalogType_1.IPlatform.All;
     }
     getMailDetail(userInfo, msg, callback) {
         let countryCode = language_1.LANGUAGE[userInfo.CountryCode] || 'US';
@@ -176,14 +176,14 @@ class MailController {
             let mailUpdate = yield this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
             lsMailStatus.forEach((mail) => {
                 var _a;
-                if (mail.status === CatalogType_1.MailStatus.NEW) {
+                if (mail.status === catalogType_1.MailStatus.NEW) {
                     let startDate = (_a = mailManager_1.mailManager.systemMails.get(mail.mailId)) === null || _a === void 0 ? void 0 : _a.startDate;
                     if (startDate && new Date(startDate) < new Date())
-                        userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mail.mailId, CatalogType_1.MailStatus.READ);
+                        userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mail.mailId, catalogType_1.MailStatus.READ);
                 }
             });
-            if (mailUpdate && mailUpdate.status === CatalogType_1.MailStatus.NEW) {
-                userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailUpdate.data.id, CatalogType_1.MailStatus.READ);
+            if (mailUpdate && mailUpdate.status === catalogType_1.MailStatus.NEW) {
+                userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailUpdate.data.id, catalogType_1.MailStatus.READ);
             }
             userMail_1.userMail.markAllMailAsRead(userInfo.UserId);
             callback({
@@ -217,7 +217,7 @@ class MailController {
             let listGiftSystem = [];
             let listStatus = yield userMail_1.userMail.getCatchingStatus(userInfo.UserId);
             listStatus.forEach((index) => {
-                if (index.status !== CatalogType_1.MailStatus.DELETED && index.status !== CatalogType_1.MailStatus.COLLECTED) {
+                if (index.status !== catalogType_1.MailStatus.DELETED && index.status !== catalogType_1.MailStatus.COLLECTED) {
                     let mailSystemActive = mailManager_1.mailManager.systemMails.get(index.mailId);
                     let giftSys = mailSystemActive.gifts;
                     let startDate = mailSystemActive.startDate;
@@ -231,7 +231,7 @@ class MailController {
                                     value: giftSys === null || giftSys === void 0 ? void 0 : giftSys.get(key),
                                 });
                             });
-                            userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, index.mailId, CatalogType_1.MailStatus.COLLECTED);
+                            userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, index.mailId, catalogType_1.MailStatus.COLLECTED);
                         }
                     }
                 }
@@ -250,13 +250,13 @@ class MailController {
             mailManager_1.mailManager.systemId.forEach((mailId) => {
                 let startDate = mailManager_1.mailManager.systemMails.get(mailId).startDate;
                 if (startDate && new Date(startDate) < new Date()) {
-                    userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailId, CatalogType_1.MailStatus.DELETED);
+                    userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailId, catalogType_1.MailStatus.DELETED);
                 }
             });
             mailManager_1.mailManager.updateId.forEach((mailId) => {
                 let startDate = mailManager_1.mailManager.updateMails.get(mailId).startDate;
                 if (startDate && new Date(startDate) < new Date()) {
-                    userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailId, CatalogType_1.MailStatus.DELETED);
+                    userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailId, catalogType_1.MailStatus.DELETED);
                 }
             });
             userMail_1.userMail.deleteAllMail(userInfo.UserId);

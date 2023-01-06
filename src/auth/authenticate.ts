@@ -3,7 +3,7 @@ import { LoginResponse, RequestMsg } from '../io/IOInterface';
 import { DeviceModel, IDeviceDocument } from '../models/device';
 import { IUserDocument, UserModel } from '../models/user';
 import { UserInfo } from '../user/userInfo';
-import { ipLocation } from '../utils/iplocation';
+import { ipLocation } from '../utils/ipLocation';
 
 class Authenticate {
   Login(socket: Socket, msg: RequestMsg, ipAdress: string, userInfo: UserInfo, fn: (res: LoginResponse) => void) {

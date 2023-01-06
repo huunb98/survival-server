@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeviceModel = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
-const CatalogType_1 = require("../helpers/CatalogType");
+const catalogType_1 = require("../helpers/catalogType");
 var deviceSchema = new mongoose_1.default.Schema({
     deviceId: String,
     appVersion: Number,
@@ -13,7 +13,7 @@ var deviceSchema = new mongoose_1.default.Schema({
     os: String,
     platform: {
         type: Number,
-        of: CatalogType_1.IPlatform,
+        of: catalogType_1.IPlatform,
     },
     user: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
     createdAt: {

@@ -18,7 +18,7 @@ const http = require('http');
 const cors = require('cors');
 const app = express();
 const authenticate_1 = require("./auth/authenticate");
-const cmd_1 = require("./helpers/cmd");
+const Cmd_1 = require("./helpers/Cmd");
 const mailRouter_1 = __importDefault(require("./routers/mailRouter"));
 const init = require("./services/init");
 const userInfo_1 = require("./user/userInfo");
@@ -88,7 +88,7 @@ init.Init().then(() => {
         let userInfo = new userInfo_1.UserInfo(socket);
         console.log(clientIp);
         socket.on('msg', function (msg, fn) {
-            if (msg.Name === cmd_1.CmdId.MOBILE_LOGIN_REQUEST) {
+            if (msg.Name === Cmd_1.CmdId.MOBILE_LOGIN_REQUEST) {
                 if (socket.logined)
                     return;
                 socket.logined = true;
@@ -108,13 +108,13 @@ init.Init().then(() => {
         function processMsg(msg, fn) {
             return __awaiter(this, void 0, void 0, function* () {
                 switch (msg.Name) {
-                    case cmd_1.CmdId.SET_NAME:
+                    case Cmd_1.CmdId.SET_NAME:
                         userService_1.userService.SetName(userInfo, msg, fn);
                         break;
-                    case cmd_1.CmdId.GET_TOPSCORE_PVP:
+                    case Cmd_1.CmdId.GET_TOPSCORE_PVP:
                         leaderboardManager_1.leaderboardManager.GetSimpeLeaderBoard(userInfo, msg, fn);
                         break;
-                    case cmd_1.CmdId.GET_PVP_INFO:
+                    case Cmd_1.CmdId.GET_PVP_INFO:
                         leaderboardManager_1.leaderboardManager.GetPvPInfo(userInfo, msg, fn);
                         break;
                 }

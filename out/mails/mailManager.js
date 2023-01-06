@@ -37,12 +37,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mailManager = void 0;
 const language_1 = require("../helpers/language");
-const MailReward_1 = require("../models/MailReward");
+const mailReward_1 = require("../models/mailReward");
 const mailSystem_1 = require("../models/mailSystem");
 const mailUpdate_1 = require("../models/mailUpdate");
 const schedule = __importStar(require("node-schedule"));
 const usermaillist_1 = require("../models/usermaillist");
-const CatalogType_1 = require("../helpers/CatalogType");
+const catalogType_1 = require("../helpers/catalogType");
 const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
 const mailconfig_1 = require("./mailconfig");
 class MailManager {
@@ -59,7 +59,7 @@ class MailManager {
             try {
                 let endDay = new Date();
                 endDay.setHours(23, 59, 59, 999);
-                let rewards = yield MailReward_1.MailRewardModel.find({ isDeleted: false }).exec();
+                let rewards = yield mailReward_1.MailRewardModel.find({ isDeleted: false }).exec();
                 let systems = yield mailSystem_1.MailSystemModel.find({ isDeleted: false, startDate: { $lt: endDay }, endDate: { $gt: new Date() } }).exec();
                 let updates = yield mailUpdate_1.MailUpdateModel.find({ isDeleted: false, startDate: { $lt: endDay }, endDate: { $gt: new Date() } }).exec();
                 rewards.forEach((index) => this.rewardMails.set(index.type.toString(), index));
@@ -129,16 +129,16 @@ class MailManager {
                     content: '',
                     timeEnd: timeEnd,
                     gifts: gifts,
-                    type: CatalogType_1.MailType.Reward,
+                    type: catalogType_1.MailType.Reward,
                 };
                 let mailRewards = this.rewardMails.get(mailUser.type.toString());
                 switch (mailUser.type) {
-                    case CatalogType_1.TypeReward.AdminPush:
+                    case catalogType_1.TypeReward.AdminPush:
                         mailDetails.title = mailUser.title || '';
                         mailDetails.content = mailUser.content || '';
                         callback(null, mailDetails);
                         break;
-                    case CatalogType_1.TypeReward.PVP:
+                    case catalogType_1.TypeReward.PVP:
                         if (mailRewards) {
                             mailDetails.sender = mailRewards.sender;
                             let mails = mailRewards.mail.get(language) || mailRewards.mail.get(this.defaultLanguage);
@@ -190,7 +190,7 @@ class MailManager {
                     content: mail.content,
                     timeEnd: new Date(mailMap.endDate).getTime(),
                     gifts: gifts,
-                    type: CatalogType_1.MailType.System,
+                    type: catalogType_1.MailType.System,
                 };
                 callback(null, mailDetails);
             }
@@ -211,7 +211,7 @@ class MailManager {
                     content: mail.content,
                     timeEnd: new Date(mailMap.endDate).getTime(),
                     gifts: gifts,
-                    type: CatalogType_1.MailType.System,
+                    type: catalogType_1.MailType.System,
                 };
                 callback(null, mailDetails);
             }
@@ -224,7 +224,7 @@ class MailManager {
             let newUserMail = new usermaillist_1.UserMailListModel();
             newUserMail.userId = userId;
             newUserMail.mailId = mailId;
-            newUserMail.type = CatalogType_1.TypeReward.UpdateVersion;
+            newUserMail.type = catalogType_1.TypeReward.UpdateVersion;
             newUserMail.gifts = gifts;
             newUserMail.validTo = endDate;
             redisUtils_1.default.SETKEY(mailconfig_1.MAIL_USER + mailId, userId, (err, rs) => {

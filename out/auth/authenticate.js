@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticate = void 0;
 const device_1 = require("../models/device");
 const user_1 = require("../models/user");
-const iplocation_1 = require("../utils/iplocation");
+const ipLocation_1 = require("../utils/ipLocation");
 class Authenticate {
     Login(socket, msg, ipAdress, userInfo, fn) {
         console.log('------- login request -----', msg);
@@ -95,7 +95,7 @@ function OnLoginSuccess(user, device, ipAdress, userInfo) {
         userInfo.User = user;
         userInfo.CreatedAt = new Date(user.createdAt);
         yield userInfo.OnLoginSuccess();
-        iplocation_1.ipLocation.SaveLocation(user._id, ipAdress, device.deviceId, userInfo);
+        ipLocation_1.ipLocation.SaveLocation(user._id, ipAdress, device.deviceId, userInfo);
         return {
             Status: 1,
             Body: {

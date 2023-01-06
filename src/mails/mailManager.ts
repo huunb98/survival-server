@@ -1,10 +1,10 @@
 import { LANGUAGE } from '../helpers/language';
-import { IMailRewardDocument, MailRewardModel } from '../models/MailReward';
+import { IMailRewardDocument, MailRewardModel } from '../models/mailReward';
 import { IMailSystemDocument, MailSystemModel } from '../models/mailSystem';
 import { INofityDocument, MailUpdateModel } from '../models/mailUpdate';
 import * as schedule from 'node-schedule';
 import { IMailUser, UserMailListModel } from '../models/usermaillist';
-import { IMail, MailStatus, MailType, TypeReward } from '../helpers/CatalogType';
+import { IMail, MailStatus, MailType, TypeReward } from '../helpers/catalogType';
 import redisUtils from '../helpers/redisUtils';
 import { MAIL_USER } from './mailconfig';
 import { GetMailDetailResponse, GiftResponse } from './mailIO';
