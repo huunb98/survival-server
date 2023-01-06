@@ -31,4 +31,4 @@ var mailRewardSchema = new mongoose.Schema({
     },
 });
 exports.MailRewardModel = mongoose.model('MailReward', mailRewardSchema);
-//# sourceMappingURL=MailReward.js.map
+//# sourceMappingURL=mailReward.js.map

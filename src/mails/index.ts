@@ -1,7 +1,7 @@
 import { IPVersion } from 'net';
 import { userMail } from './userMail';
 import { IPlatform, MailStatus } from '../helpers/CatalogType';
-import { CmdId } from '../helpers/Cmd';
+import { CmdId } from '../helpers/cmd';
 import { COUNTRY_LANGUAGE, LANGUAGE } from '../helpers/language';
 import redisUtils from '../helpers/redisUtils';
 import { RequestMsg, RespsoneMsg } from '../io/IOInterface';

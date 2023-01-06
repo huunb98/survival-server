@@ -19,11 +19,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const CatalogType_1 = require("../helpers/CatalogType");
+const catalogType_1 = require("../helpers/catalogType");
 const language_1 = require("../helpers/language");
-const Translate_1 = __importDefault(require("../helpers/Translate"));
+const translate_1 = __importDefault(require("../helpers/translate"));
 const mailUpdate_1 = require("../models/mailUpdate");
-const MailReward_1 = require("../models/MailReward");
+const mailReward_1 = require("../models/mailReward");
 const mailSystem_1 = require("../models/mailSystem");
 class MailCMS {
     createMailSystem(title, content, sender, gifts, platform, countryCode, startDate, endDate, callback) {
@@ -75,7 +75,7 @@ class MailCMS {
     createMailReward(title, content, sender, type, gifts, expiryDate, callback) {
         return __awaiter(this, void 0, void 0, function* () {
             let mail = yield this.translateMail(title, content);
-            let mailDocument = new MailReward_1.MailRewardModel();
+            let mailDocument = new mailReward_1.MailRewardModel();
             mailDocument.mail = mail;
             mailDocument.sender = sender;
             mailDocument.type = type;
@@ -150,7 +150,7 @@ class MailCMS {
             .catch((err) => callback('Database error', null));
     }
     updateMailReward(mailId, language, title, content, sender, type, gifts, expiryDate, isDeleted, callback) {
-        MailReward_1.MailRewardModel.findById(mailId)
+        mailReward_1.MailRewardModel.findById(mailId)
             .then((mail) => {
             if (mail) {
                 let updateContent = {
@@ -181,7 +181,7 @@ class MailCMS {
                 let mailSystem = yield mailSystem_1.MailSystemModel.find({}).sort({ _id: -1 }).skip(skip).limit(limit).exec();
                 let results = [];
                 for (const mail of mailSystem) {
-                    let result = new CatalogType_1.MailSystemResult();
+                    let result = new catalogType_1.MailSystemResult();
                     result.id = mail.id;
                     result.title = mail.mail.get(language).title;
                     result.platform = mail.platform;
@@ -205,7 +205,7 @@ class MailCMS {
                 let mailSystem = yield mailUpdate_1.MailUpdateModel.find({}).sort({ _id: -1 }).skip(skip).limit(limit).exec();
                 let results = [];
                 for (const mail of mailSystem) {
-                    let result = new CatalogType_1.MailUpdateResult();
+                    let result = new catalogType_1.MailUpdateResult();
                     result.id = mail.id;
                     result.title = mail.mail.get(language).title;
                     result.version = mail.version;
@@ -227,10 +227,10 @@ class MailCMS {
     getMailReward(language, skip, limit, callback) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let mailSystem = yield MailReward_1.MailRewardModel.find({}).sort({ _id: -1 }).skip(skip).limit(limit).exec();
+                let mailSystem = yield mailReward_1.MailRewardModel.find({}).sort({ _id: -1 }).skip(skip).limit(limit).exec();
                 let results = [];
                 for (const mail of mailSystem) {
-                    let result = new CatalogType_1.MailRewardResult();
+                    let result = new catalogType_1.MailRewardResult();
                     result.id = mail.id;
                     result.title = mail.mail.get(language).title;
                     result.expiryDate = mail.expiryDate;
@@ -250,22 +250,22 @@ class MailCMS {
     }
     getMailDetails(mailId, type, callback) {
         switch (type) {
-            case CatalogType_1.MailType.System:
+            case catalogType_1.MailType.System:
                 mailSystem_1.MailSystemModel.findById(mailId)
                     .then((data) => {
                     callback(null, data);
                 })
                     .catch((err) => callback(err, null));
                 break;
-            case CatalogType_1.MailType.Update:
+            case catalogType_1.MailType.Update:
                 mailUpdate_1.MailUpdateModel.findById(mailId)
                     .then((data) => {
                     callback(null, data);
                 })
                     .catch((err) => callback(err, null));
                 break;
-            case CatalogType_1.MailType.Reward:
-                MailReward_1.MailRewardModel.findById(mailId)
+            case catalogType_1.MailType.Reward:
+                mailReward_1.MailRewardModel.findById(mailId)
                     .then((data) => {
                     callback(null, data);
                 })
@@ -288,8 +288,8 @@ class MailCMS {
                 for (var LANGUAGE_TRANSLATE_1 = __asyncValues(language_1.LANGUAGE_TRANSLATE), LANGUAGE_TRANSLATE_1_1; LANGUAGE_TRANSLATE_1_1 = yield LANGUAGE_TRANSLATE_1.next(), !LANGUAGE_TRANSLATE_1_1.done;) {
                     const index = LANGUAGE_TRANSLATE_1_1.value;
                     mail.set(index.language, {
-                        title: yield Translate_1.default.autoTranslate(title, index['ISO-639-1 Code']),
-                        content: yield Translate_1.default.autoTranslate(content, index['ISO-639-1 Code']),
+                        title: yield translate_1.default.autoTranslate(title, index['ISO-639-1 Code']),
+                        content: yield translate_1.default.autoTranslate(content, index['ISO-639-1 Code']),
                     });
                 }
             }

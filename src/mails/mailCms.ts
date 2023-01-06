@@ -1,8 +1,8 @@
-import { IMail, IPlatform, MailRewardResult, MailSystemResult, MailType, MailUpdateResult, TypeReward } from '../helpers/CatalogType';
+import { IMail, IPlatform, MailRewardResult, MailSystemResult, MailType, MailUpdateResult, TypeReward } from '../helpers/catalogType';
 import { LANGUAGE, LANGUAGE_TRANSLATE } from '../helpers/language';
-import Translate from '../helpers/Translate';
+import Translate from '../helpers/translate';
 import { MailUpdateModel } from '../models/mailUpdate';
-import { MailRewardModel } from '../models/MailReward';
+import { MailRewardModel } from '../models/mailReward';
 import { MailSystemModel } from '../models/mailSystem';
 
 export default class MailCMS {

@@ -53,4 +53,4 @@ class Translate {
     }
 }
 exports.default = Translate;
-//# sourceMappingURL=Translate.js.map
+//# sourceMappingURL=translate.js.map

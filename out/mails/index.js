@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.mailController = void 0;
 const userMail_1 = require("./userMail");
 const CatalogType_1 = require("../helpers/CatalogType");
-const Cmd_1 = require("../helpers/Cmd");
+const cmd_1 = require("../helpers/cmd");
 const language_1 = require("../helpers/language");
 const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
 const mailconfig_1 = require("./mailconfig");
@@ -24,28 +24,28 @@ class MailController {
     processMsg(userInfo, msg, callback) {
         return __awaiter(this, void 0, void 0, function* () {
             switch (msg.Name) {
-                case Cmd_1.CmdId.GetMailList:
+                case cmd_1.CmdId.GetMailList:
                     this.getMailList(userInfo, callback);
                     break;
-                case Cmd_1.CmdId.GetMailDetail:
+                case cmd_1.CmdId.GetMailDetail:
                     this.getMailDetail(userInfo, msg, callback);
                     break;
-                case Cmd_1.CmdId.MarkAsRead:
+                case cmd_1.CmdId.MarkAsRead:
                     this.readMail(userInfo, msg, callback);
                     break;
-                case Cmd_1.CmdId.MarkAsCollect:
+                case cmd_1.CmdId.MarkAsCollect:
                     this.claimMail(userInfo, msg, callback);
                     break;
-                case Cmd_1.CmdId.DeleteMail:
+                case cmd_1.CmdId.DeleteMail:
                     this.deleteMail(userInfo, msg, callback);
                     break;
-                case Cmd_1.CmdId.MarkAllAsRead:
+                case cmd_1.CmdId.MarkAllAsRead:
                     this.readAllMail(userInfo, msg, callback);
                     break;
-                case Cmd_1.CmdId.MarkAllAsCollect:
+                case cmd_1.CmdId.MarkAllAsCollect:
                     this.claimAllMail(userInfo, msg, callback);
                     break;
-                case Cmd_1.CmdId.DeleteAllMail:
+                case cmd_1.CmdId.DeleteAllMail:
                     this.deleteAllMail(userInfo, msg, callback);
                     break;
             }
