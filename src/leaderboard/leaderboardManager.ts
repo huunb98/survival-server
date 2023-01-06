@@ -58,7 +58,6 @@ class LeaderboardManager {
       Body: {
         Season: season,
         EndTime: new Date(this.leaderBoardMap.get('PVP').EndSeason).getTime(),
-        CurrentTime: new Date().toLocaleString(),
       },
     });
   }
@@ -138,7 +137,7 @@ class LeaderboardManager {
           resolve(null);
         } else {
           let scoreAndRankData: IUserRank = {
-            Score: -1,
+            Score: 100,
             RankNumber: -1,
           };
           if (replies) {
