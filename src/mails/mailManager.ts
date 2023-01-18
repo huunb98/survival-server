@@ -26,7 +26,11 @@ class MailManager {
     this.updateMails = new Map();
   }
 
-  async getMailConfig() {
+  /**
+   * Reload all mail catching
+   */
+
+  private async getMailConfig() {
     try {
       let endDay = new Date();
       endDay.setHours(23, 59, 59, 999);

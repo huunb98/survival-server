@@ -65,4 +65,4 @@ class IPLocation {
     }
 }
 exports.ipLocation = new IPLocation();
-//# sourceMappingURL=iplocation.js.map
+//# sourceMappingURL=ipLocation.js.map

@@ -4,6 +4,7 @@ import Translate from '../helpers/translate';
 import { MailUpdateModel } from '../models/mailUpdate';
 import { MailRewardModel } from '../models/mailReward';
 import { MailSystemModel } from '../models/mailSystem';
+import { mailManager } from './mailManager';
 
 export default class MailCMS {
   async createMailSystem(
@@ -32,6 +33,7 @@ export default class MailCMS {
     mailDocument
       .save()
       .then((_) => {
+        mailManager.reloadConfig();
         callback(null, 'Add Mail System Succeed');
       })
       .catch((error) => {
@@ -66,6 +68,7 @@ export default class MailCMS {
     mailDocument
       .save()
       .then((_) => {
+        mailManager.reloadConfig();
         callback(null, 'Add Mail Update Succeed');
       })
       .catch((error) => {
@@ -87,6 +90,7 @@ export default class MailCMS {
     mailDocument
       .save()
       .then((_) => {
+        mailManager.reloadConfig();
         callback(null, 'Add Mail Reward Succeed');
       })
       .catch((error) => {
@@ -129,7 +133,10 @@ export default class MailCMS {
 
           mail
             .save()
-            .then(() => callback(null, 'Update Success'))
+            .then(() => {
+              mailManager.reloadConfig();
+              callback(null, 'Update Success');
+            })
             .catch((err) => callback('Database error', null));
         } else callback('Mail not found', null);
       })
@@ -170,7 +177,10 @@ export default class MailCMS {
 
           mail
             .save()
-            .then(() => callback(null, 'Update Success'))
+            .then(() => {
+              mailManager.reloadConfig();
+              callback(null, 'Update Success');
+            })
             .catch((err) => callback('Database error', null));
         } else callback('Mail not found', null);
       })
@@ -207,7 +217,10 @@ export default class MailCMS {
 
           mail
             .save()
-            .then(() => callback(null, 'Update Success'))
+            .then(() => {
+              mailManager.reloadConfig();
+              callback(null, 'Update Success');
+            })
             .catch((err) => callback('Database error', null));
         } else callback('Mail not found', null);
       })
@@ -314,6 +327,10 @@ export default class MailCMS {
         console.log('Error get mail detail', type);
         callback('Invalid mail type', null);
     }
+  }
+
+  reloadConfig() {
+    mailManager.reloadConfig();
   }
 
   private async translateMail(title: string, content: string): Promise<Map<string, IMail>> {
