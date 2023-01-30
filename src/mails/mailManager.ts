@@ -13,6 +13,7 @@ class MailManager {
   systemMails: Map<string, IMailSystemDocument>;
   rewardMails: Map<string, IMailRewardDocument>;
   updateMails: Map<string, INofityDocument>;
+  updateMailById: Map<string, INofityDocument>;
 
   systemId: string[] = [];
 
@@ -24,6 +25,7 @@ class MailManager {
     this.systemMails = new Map();
     this.rewardMails = new Map();
     this.updateMails = new Map();
+    this.updateMailById = new Map();
   }
 
   /**
@@ -45,7 +47,8 @@ class MailManager {
         this.systemId.push(index.id);
       });
       updates.forEach((index) => {
-        this.updateMails.set(index.id, index);
+        this.updateMails.set(index.platform.toString(), index);
+        this.updateMailById.set(index.id, index);
         this.updateId.push(index.id);
       });
     } catch (error) {
@@ -66,7 +69,8 @@ class MailManager {
   }
 
   getMail(id: string, isUpdate: boolean, language: string): IMail | null {
-    let mailMap = isUpdate ? this.updateMails.get(id) : this.systemMails.get(id);
+    console.log(id, isUpdate, language);
+    let mailMap = isUpdate ? this.updateMailById.get(id) : this.systemMails.get(id);
     if (mailMap) {
       let mailContent = mailMap.mail.get(language) || mailMap.mail.get(this.defaultLanguage);
       if (mailContent) return mailContent;

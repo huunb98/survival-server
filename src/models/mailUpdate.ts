@@ -35,7 +35,10 @@ const notifyDocument = new mongoose.Schema(
       type: Number,
       of: IPlatform,
     },
-    isDeleted: Boolean,
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
     startDate: Date,
     endDate: Date,
     createdAt: {

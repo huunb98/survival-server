@@ -251,7 +251,7 @@ export default class MailCMS {
     }
   }
 
-  async getMailUpdate(language: string, skip: number, limit: number, callback: Function) {
+  async getMailUpdate(language, skip, limit, callback: Function) {
     try {
       let mailSystem = await MailUpdateModel.find({}).sort({ _id: -1 }).skip(skip).limit(limit).exec();
 

@@ -25,6 +25,7 @@ const translate_1 = __importDefault(require("../helpers/translate"));
 const mailUpdate_1 = require("../models/mailUpdate");
 const mailReward_1 = require("../models/mailReward");
 const mailSystem_1 = require("../models/mailSystem");
+const mailManager_1 = require("./mailManager");
 class MailCMS {
     createMailSystem(title, content, sender, gifts, platform, countryCode, startDate, endDate, callback) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -42,6 +43,7 @@ class MailCMS {
             mailDocument
                 .save()
                 .then((_) => {
+                mailManager_1.mailManager.reloadConfig();
                 callback(null, 'Add Mail System Succeed');
             })
                 .catch((error) => {
@@ -64,6 +66,7 @@ class MailCMS {
             mailDocument
                 .save()
                 .then((_) => {
+                mailManager_1.mailManager.reloadConfig();
                 callback(null, 'Add Mail Update Succeed');
             })
                 .catch((error) => {
@@ -84,6 +87,7 @@ class MailCMS {
             mailDocument
                 .save()
                 .then((_) => {
+                mailManager_1.mailManager.reloadConfig();
                 callback(null, 'Add Mail Reward Succeed');
             })
                 .catch((error) => {
@@ -113,7 +117,10 @@ class MailCMS {
                 mail.updatedAt = new Date();
                 mail
                     .save()
-                    .then(() => callback(null, 'Update Success'))
+                    .then(() => {
+                    mailManager_1.mailManager.reloadConfig();
+                    callback(null, 'Update Success');
+                })
                     .catch((err) => callback('Database error', null));
             }
             else
@@ -141,7 +148,10 @@ class MailCMS {
                 mail.updatedAt = new Date();
                 mail
                     .save()
-                    .then(() => callback(null, 'Update Success'))
+                    .then(() => {
+                    mailManager_1.mailManager.reloadConfig();
+                    callback(null, 'Update Success');
+                })
                     .catch((err) => callback('Database error', null));
             }
             else
@@ -167,7 +177,10 @@ class MailCMS {
                 mail.updatedAt = new Date();
                 mail
                     .save()
-                    .then(() => callback(null, 'Update Success'))
+                    .then(() => {
+                    mailManager_1.mailManager.reloadConfig();
+                    callback(null, 'Update Success');
+                })
                     .catch((err) => callback('Database error', null));
             }
             else
@@ -275,6 +288,9 @@ class MailCMS {
                 console.log('Error get mail detail', type);
                 callback('Invalid mail type', null);
         }
+    }
+    reloadConfig() {
+        mailManager_1.mailManager.reloadConfig();
     }
     translateMail(title, content) {
         var e_1, _a;

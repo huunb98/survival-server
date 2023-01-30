@@ -5,7 +5,7 @@ import { GiftResponse, MailCachingStatus, MailSystems, MailUpdates, UserMailList
 import { mailManager } from './mailManager';
 import { MailStatus, MailType, TypeReward } from '../helpers/catalogType';
 import { LANGUAGE } from '../helpers/language';
-import { mailController } from '.';
+
 class UserMail {
   async loadMailPrivate(userId: string) {
     try {
@@ -30,15 +30,15 @@ class UserMail {
     });
   }
 
-  getMailOverview(language: string, lsMailSystem: MailSystems[] | MailUpdates[], isUpdate: boolean): UserMailList[] {
+  getMailOverview(language: string, lsMail: MailSystems[] | MailUpdates[], isUpdate: boolean): UserMailList[] {
     let mailListSys: UserMailList[] = [];
-    for (let i = 0; i < lsMailSystem.length; i++) {
-      let mailContent = mailManager.getMail(lsMailSystem[i].data.id, isUpdate, language);
-      if (mailContent && new Date(lsMailSystem[i].data.startDate) < new Date() && new Date(lsMailSystem[i].data.endDate) > new Date()) {
+    for (let i = 0; i < lsMail.length; i++) {
+      let mailContent = mailManager.getMail(lsMail[i].data.id, isUpdate, language);
+      if (mailContent && new Date(lsMail[i].data.startDate) < new Date() && new Date(lsMail[i].data.endDate) > new Date()) {
         mailListSys.push({
-          mailId: lsMailSystem[i].data.id,
-          status: lsMailSystem[i].status,
-          timeEnd: Math.floor(new Date(lsMailSystem[i].data.endDate).getTime()),
+          mailId: lsMail[i].data.id,
+          status: lsMail[i].status,
+          timeEnd: Math.floor(new Date(lsMail[i].data.endDate).getTime()),
           title: mailContent.title,
           type: isUpdate ? MailType.Update : MailType.System,
         });

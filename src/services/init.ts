@@ -6,7 +6,7 @@ export = {
   Init: async function () {
     await new MongoDBDatabase().connectAsync();
 
-    mailManager.getMailConfig();
+    mailManager.reloadConfig();
     leaderboardManager.initLeaderboard();
   },
 };

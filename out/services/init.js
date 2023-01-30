@@ -15,7 +15,7 @@ module.exports = {
     Init: function () {
         return __awaiter(this, void 0, void 0, function* () {
             yield new mongodb_1.MongoDBDatabase().connectAsync();
-            mailManager_1.mailManager.getMailConfig();
+            mailManager_1.mailManager.reloadConfig();
             leaderboardManager_1.leaderboardManager.initLeaderboard();
         });
     },

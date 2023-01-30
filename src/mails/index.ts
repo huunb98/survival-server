@@ -53,6 +53,7 @@ class MailController {
     let lsValidMail: MailSystems[] = this.checkMailValid(listStatus, userInfo.CountryCode, userInfo.Platform);
 
     let mailUpdate = await this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
+
     /** Lấy mail của user trong bảng user mail */
     let mailListPrivate = await userMail.loadMailPrivate(userInfo.UserId);
 
@@ -84,6 +85,7 @@ class MailController {
   private checkMailUpdate(userId: string, platform: IPlatform, appVersion: number, createdAt: Date): Promise<MailUpdates | null> {
     try {
       const mailUpdate = mailManager.updateMails.get(IPlatform.All.toString()) || mailManager.updateMails.get(platform.toString());
+
       if (!mailUpdate) return Promise.resolve(null);
 
       const gifts = mailUpdate.gifts;
@@ -98,15 +100,14 @@ class MailController {
         }
         return Promise.resolve(null);
       } else if (appVersion >= mailUpdate.minVersion && appVersion < mailUpdate.version) {
-        redisUtils.HGET(MAIL_USER + mailUpdate.id, userId, (error, status) => {
-          if (status) {
-            if (status === MailStatus.DELETED) return Promise.resolve(null);
-            else
-              return Promise.resolve({
-                data: mailUpdate,
-                status: MailStatus.NEW,
-              });
-          }
+        return new Promise<MailUpdates | null>((resolve, reject) => {
+          redisUtils.HGET(MAIL_USER + mailUpdate.id, userId, (error, status) => {
+            if (status && status === MailStatus.DELETED) return resolve(null);
+            resolve({
+              data: mailUpdate,
+              status: MailStatus.NEW,
+            });
+          });
         });
       } else return Promise.resolve(null);
     } catch (error) {

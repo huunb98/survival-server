@@ -53,7 +53,11 @@ class MailManager {
         this.systemMails = new Map();
         this.rewardMails = new Map();
         this.updateMails = new Map();
+        this.updateMailById = new Map();
     }
+    /**
+     * Reload all mail catching
+     */
     getMailConfig() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -68,7 +72,8 @@ class MailManager {
                     this.systemId.push(index.id);
                 });
                 updates.forEach((index) => {
-                    this.updateMails.set(index.id, index);
+                    this.updateMails.set(index.platform.toString(), index);
+                    this.updateMailById.set(index.id, index);
                     this.updateId.push(index.id);
                 });
             }
@@ -88,7 +93,8 @@ class MailManager {
         this.getMailConfig();
     }
     getMail(id, isUpdate, language) {
-        let mailMap = isUpdate ? this.updateMails.get(id) : this.systemMails.get(id);
+        console.log(id, isUpdate, language);
+        let mailMap = isUpdate ? this.updateMailById.get(id) : this.systemMails.get(id);
         if (mailMap) {
             let mailContent = mailMap.mail.get(language) || mailMap.mail.get(this.defaultLanguage);
             if (mailContent)

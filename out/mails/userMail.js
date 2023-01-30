@@ -51,15 +51,15 @@ class UserMail {
             });
         });
     }
-    getMailOverview(language, lsMailSystem, isUpdate) {
+    getMailOverview(language, lsMail, isUpdate) {
         let mailListSys = [];
-        for (let i = 0; i < lsMailSystem.length; i++) {
-            let mailContent = mailManager_1.mailManager.getMail(lsMailSystem[i].data.id, isUpdate, language);
-            if (mailContent && new Date(lsMailSystem[i].data.startDate) < new Date() && new Date(lsMailSystem[i].data.endDate) > new Date()) {
+        for (let i = 0; i < lsMail.length; i++) {
+            let mailContent = mailManager_1.mailManager.getMail(lsMail[i].data.id, isUpdate, language);
+            if (mailContent && new Date(lsMail[i].data.startDate) < new Date() && new Date(lsMail[i].data.endDate) > new Date()) {
                 mailListSys.push({
-                    mailId: lsMailSystem[i].data.id,
-                    status: lsMailSystem[i].status,
-                    timeEnd: Math.floor(new Date(lsMailSystem[i].data.endDate).getTime()),
+                    mailId: lsMail[i].data.id,
+                    status: lsMail[i].status,
+                    timeEnd: Math.floor(new Date(lsMail[i].data.endDate).getTime()),
                     title: mailContent.title,
                     type: isUpdate ? catalogType_1.MailType.Update : catalogType_1.MailType.System,
                 });
