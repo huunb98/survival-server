@@ -276,7 +276,7 @@ export default class MailCMS {
     }
   }
 
-  async getMailReward(language: string, skip: number, limit: number, callback: Function) {
+  async getMailReward(language, skip, limit, callback: Function) {
     try {
       let mailSystem = await MailRewardModel.find({}).sort({ _id: -1 }).skip(skip).limit(limit).exec();
 

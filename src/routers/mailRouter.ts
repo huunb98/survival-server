@@ -165,6 +165,88 @@ MailRouter.route('/mailUpdate')
     }
   );
 
+MailRouter.route('/mailReward')
+  .get(check('language').exists({ checkFalsy: true, checkNull: true }), function (req: Request, res: Response) {
+    console.log('get mail reward request', req.query);
+    let error = validationResult(req);
+    let errorList = error.array();
+
+    if (errorList.length) return res.status(400).send('Invalid parameter');
+
+    const { language, skip, limit } = req.query;
+    new MailCMS().getMailReward(language, skip, limit, (error: string, response: string) => {
+      if (error) {
+        res.status(400).send(error);
+        return;
+      }
+      console.log('rs mail reward', response);
+      res.send(response);
+    });
+  })
+  .post(
+    check('type').exists({ checkFalsy: true, checkNull: true }),
+    check('content').exists({ checkFalsy: true, checkNull: true }),
+    check('title').exists({ checkFalsy: true, checkNull: true }),
+    check('expiryDate').exists({ checkFalsy: true, checkNull: true }),
+    function (req: Request, res: Response) {
+      console.log(req.body);
+      let error = validationResult(req);
+      let errorList = error.array();
+
+      let giftError = false;
+      let gifts: Map<string, number> = new Map();
+      console.log(req.body);
+      if (req.body.gifts) {
+        gifts = req.body.gifts;
+        if (typeof gifts != 'object') {
+          giftError = true;
+        }
+      } else gifts = null;
+      if (errorList.length || giftError) {
+        res.send({
+          Status: 0,
+          Body: {
+            Err: 'Invalid parameter',
+          },
+        });
+        return;
+      }
+
+      const { sender, title, content, type, expiryDate } = req.body;
+      new MailCMS().createMailReward(title, content, sender, type, gifts, expiryDate, (error: string, response: string) => {
+        if (error) {
+          res.status(400).send(error);
+          return;
+        }
+        res.send(response);
+      });
+    }
+  )
+  .put(
+    check('mailId').exists({ checkFalsy: true, checkNull: true }).isLength({ min: 24, max: 24 }),
+    check('isActive').exists({ checkNull: true }),
+    function (req: Request, res: Response) {
+      let error = validationResult(req);
+      let errorList = error.array();
+
+      if (errorList.length) {
+        res.send({
+          Status: 0,
+          Body: {
+            Err: 'Invalid parameter',
+          },
+        });
+        return;
+      }
+      const { mailId, language, title, content, gifts, platform, version, minVersion, startDate, endDate, isActive } = req.body;
+
+      new MailCMS().updateMailNotifyUpdate(mailId, language, title, content, gifts, version, minVersion, platform, startDate, endDate, isActive, (error, response) => {
+        if (error) return res.status(400).send(error);
+        res.send(response);
+      });
+    }
+  );
+
 MailRouter.post(
   '/mailDetail',
   check('mailId').exists({ checkFalsy: true, checkNull: true }),
