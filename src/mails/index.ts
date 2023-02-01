@@ -57,7 +57,7 @@ class MailController {
     /** Lấy mail của user trong bảng user mail */
     let mailListPrivate = await userMail.loadMailPrivate(userInfo.UserId);
 
-    let contryCode = LANGUAGE[userInfo.CountryCode] || 'US';
+    let contryCode = userInfo.CountryCode || 'US';
 
     let userMailList: UserMailList[] = userMail.getMailOverview(COUNTRY_LANGUAGE[contryCode], lsValidMail, false);
 
@@ -88,14 +88,16 @@ class MailController {
 
       if (!mailUpdate) return Promise.resolve(null);
 
+      console.log(userId, platform, appVersion, createdAt);
+      console.log(mailUpdate.version);
       const gifts = mailUpdate.gifts;
 
       if (createdAt > new Date(mailUpdate.createdAt)) return Promise.resolve(null);
 
       if (appVersion === mailUpdate.version) {
         if (gifts) {
-          redisUtils.SISMEMBER(MAIL_USER + mailUpdate.id, userId, (err, results) => {
-            if (!err) mailManager.sendRewardAppVersion(userId, mailUpdate.id, gifts, mailUpdate.endDate);
+          redisUtils.SISMEMBER(MAIL_USER + mailUpdate.id + 'Reward', userId, (err, results) => {
+            if (!results && !err) mailManager.sendRewardAppVersion(userId, mailUpdate.id, gifts, mailUpdate.endDate);
           });
         }
         return Promise.resolve(null);
@@ -142,7 +144,8 @@ class MailController {
   }
 
   getMailDetail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
-    let countryCode = LANGUAGE[userInfo.CountryCode] || 'US';
+    console.log('user country code', userInfo.CountryCode);
+    let countryCode = userInfo.CountryCode || 'US';
     userMail.getMailDetails(userInfo.UserId, msg.Body.MailId, msg.Body.Type, COUNTRY_LANGUAGE[countryCode], (err, result) => {
       if (err) {
         callback({

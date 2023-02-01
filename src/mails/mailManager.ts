@@ -127,6 +127,18 @@ class MailManager {
             callback(null, mailDetails);
           } else callback('Mail not found', null);
           break;
+        case TypeReward.UpdateVersion:
+          if (mailRewards) {
+            mailDetails.sender = mailRewards.sender;
+            let mails = mailRewards.mail.get(language) || mailRewards.mail.get(this.defaultLanguage);
+            if (mails) {
+              mailDetails.title = mails.title;
+              let version = this.updateMailById.get(mailUser.mailId) ? this.updateMailById.get(mailUser.mailId).version.toString() : '';
+              mailDetails.content = mails.content.replace('{}', version);
+            }
+            callback(null, mailDetails);
+          } else callback('Mail not found', null);
+          break;
         default:
           if (mailRewards) {
             if (mailRewards) {
@@ -168,7 +180,7 @@ class MailManager {
   }
 
   async getMailUpdateDetail(mailId: string, language: string, status: MailStatus, callback: Function) {
-    let mailMap = this.updateMails.get(mailId);
+    let mailMap = this.updateMailById.get(mailId);
     let mail = mailMap.mail.get(language) || mailMap.mail.get(this.defaultLanguage);
     let gifts: GiftResponse[] = [];
     if (mail) {
@@ -193,7 +205,7 @@ class MailManager {
     newUserMail.gifts = gifts;
     newUserMail.validTo = endDate;
 
-    redisUtils.SETKEY(MAIL_USER + mailId, userId, (err, rs) => {
+    redisUtils.SETKEY(MAIL_USER + mailId + 'Reward', userId, (err, rs) => {
       if (err) console.log(err);
     });
     newUserMail

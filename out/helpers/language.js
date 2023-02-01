@@ -24,7 +24,7 @@ var LANGUAGE;
 var COUNTRY_LANGUAGE;
 (function (COUNTRY_LANGUAGE) {
     COUNTRY_LANGUAGE["US"] = "English";
-    COUNTRY_LANGUAGE["VI"] = "Vietnamese";
+    COUNTRY_LANGUAGE["VN"] = "Vietnamese";
     COUNTRY_LANGUAGE["RU"] = "Russian";
     COUNTRY_LANGUAGE["FR"] = "French";
     COUNTRY_LANGUAGE["JP"] = "Japanese";

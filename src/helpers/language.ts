@@ -21,7 +21,7 @@ export enum LANGUAGE {
 
 export enum COUNTRY_LANGUAGE {
   US = 'English',
-  VI = 'Vietnamese',
+  VN = 'Vietnamese',
   RU = 'Russian',
   FR = 'French',
   JP = 'Japanese',

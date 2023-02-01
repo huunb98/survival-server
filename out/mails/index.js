@@ -64,7 +64,7 @@ class MailController {
             let mailUpdate = yield this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
             /** Lấy mail của user trong bảng user mail */
             let mailListPrivate = yield userMail_1.userMail.loadMailPrivate(userInfo.UserId);
-            let contryCode = language_1.LANGUAGE[userInfo.CountryCode] || 'US';
+            let contryCode = userInfo.CountryCode || 'US';
             let userMailList = userMail_1.userMail.getMailOverview(language_1.COUNTRY_LANGUAGE[contryCode], lsValidMail, false);
             if (mailUpdate)
                 userMailList = userMailList.concat(userMail_1.userMail.getMailOverview(language_1.COUNTRY_LANGUAGE[contryCode], [mailUpdate], true));
@@ -92,13 +92,15 @@ class MailController {
             const mailUpdate = mailManager_1.mailManager.updateMails.get(catalogType_1.IPlatform.All.toString()) || mailManager_1.mailManager.updateMails.get(platform.toString());
             if (!mailUpdate)
                 return Promise.resolve(null);
+            console.log(userId, platform, appVersion, createdAt);
+            console.log(mailUpdate.version);
             const gifts = mailUpdate.gifts;
             if (createdAt > new Date(mailUpdate.createdAt))
                 return Promise.resolve(null);
             if (appVersion === mailUpdate.version) {
                 if (gifts) {
-                    redisUtils_1.default.SISMEMBER(mailconfig_1.MAIL_USER + mailUpdate.id, userId, (err, results) => {
-                        if (!err)
+                    redisUtils_1.default.SISMEMBER(mailconfig_1.MAIL_USER + mailUpdate.id + 'Reward', userId, (err, results) => {
+                        if (!results && !err)
                             mailManager_1.mailManager.sendRewardAppVersion(userId, mailUpdate.id, gifts, mailUpdate.endDate);
                     });
                 }
@@ -145,7 +147,8 @@ class MailController {
         return mail.platform === platform || mail.platform === catalogType_1.IPlatform.All;
     }
     getMailDetail(userInfo, msg, callback) {
-        let countryCode = language_1.LANGUAGE[userInfo.CountryCode] || 'US';
+        console.log('user country code', userInfo.CountryCode);
+        let countryCode = userInfo.CountryCode || 'US';
         userMail_1.userMail.getMailDetails(userInfo.UserId, msg.Body.MailId, msg.Body.Type, language_1.COUNTRY_LANGUAGE[countryCode], (err, result) => {
             if (err) {
                 callback({
