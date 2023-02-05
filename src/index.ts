@@ -114,9 +114,6 @@ init.Init().then(() => {
         case CmdId.GET_TOPSCORE_PVP:
           leaderboardManager.GetSimpeLeaderBoard(userInfo, msg, fn);
           break;
-        case CmdId.GET_PVP_INFO:
-          leaderboardManager.GetPvPInfo(userInfo, msg, fn);
-          break;
       }
     }
 

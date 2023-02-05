@@ -19,7 +19,7 @@ const leaderboardResetManager_1 = require("./leaderboardResetManager");
 class LeaderboardManager {
     constructor() {
         this.leaderBoardMap = new Map();
-        this.keyLeaderboard = 'LEADERBOARD';
+        this.keyLeaderboard = 'LEADERBOARD:';
     }
     initLeaderboard() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -38,13 +38,6 @@ class LeaderboardManager {
         this.leaderBoardMap.get(name).NextSeason = nextSeason;
         console.log(this.leaderBoardMap);
     }
-    /**
-     * Lấy thông tin mode chơi pvp
-     * Kiểm tra xem user đã chơi mùa trước hay chưa và trả thưởng
-     * @param user
-     * @param msg
-     * @param fn
-     */
     GetPvPInfo(user, msg, fn) {
         return __awaiter(this, void 0, void 0, function* () {
             let season = this.leaderBoardMap.get('PVP').Season;
@@ -69,19 +62,44 @@ class LeaderboardManager {
             });
         });
     }
-    GetSimpeLeaderBoard(userInfor, msg, fn) {
+    /**
+     * Lấy thông tin mode chơi pvp
+     * Kiểm tra xem user đã chơi mùa trước hay chưa và trả thưởng
+     * @param user
+     * @param msg
+     * @param fn
+     */
+    GetSimpeLeaderBoard(userInfo, msg, fn) {
         return __awaiter(this, void 0, void 0, function* () {
             let topUser = [];
-            let season = this.leaderBoardMap.get(msg.Body.LeaderBoardName).Season;
-            let LeaderBoardName = this.keyLeaderboard + msg.Body.LeaderBoardName + season;
-            if (LeaderBoardName != undefined && LeaderBoardName != '') {
-                let userScore = yield exports.leaderboardManager.GetUserRank(LeaderBoardName, userInfor.UserId, 'DESC');
+            let leaderboardMode = msg.Body.LeaderBoardName;
+            if (leaderboardMode != undefined && leaderboardMode != '') {
+                let season = this.leaderBoardMap.get(leaderboardMode).Season;
+                if (userInfo.User.lastPVP && userInfo.User.lastPVP < season) {
+                    let lastUserLeaderBoardName = this.keyLeaderboard + leaderboardMode + userInfo.User.lastPVP;
+                    let lastUserScore = yield exports.leaderboardManager.GetUserRank(lastUserLeaderBoardName, userInfo.UserId, 'DESC');
+                    /**
+                     * Trả thưởng qua mail thông qua xếp hạng rank
+                     */
+                    console.log(lastUserScore);
+                    userInfo.User.lastPVP = season;
+                    userInfo.User.save();
+                }
+                else if (!userInfo.User.lastPVP) {
+                    userInfo.User.lastPVP = season;
+                    userInfo.User.save();
+                }
+                let leaderBoardName = this.keyLeaderboard + leaderboardMode + season;
+                let userScore = yield exports.leaderboardManager.GetUserRank(leaderBoardName, userInfo.UserId, 'DESC');
                 // if (!this.mapBXH.has(LeaderBoardName) || (this.mapBXH.has(LeaderBoardName) && (Date.now() - this.mapBXH.get(LeaderBoardName).TimeLoad) > 30000)) {
                 //     console.log('add Top to cache', LeaderBoardName);
-                topUser = yield exports.leaderboardManager.GetLeaderBoardWithHashDESC(LeaderBoardName, 0, 19);
+                topUser = yield exports.leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19);
                 fn({
                     Status: 1,
                     Body: {
+                        Season: season,
+                        EndTime: new Date(this.leaderBoardMap.get('PVP').EndSeason).getTime(),
+                        CurrentTime: Date.now(),
                         TopUser: topUser,
                         YourScore: userScore,
                     },

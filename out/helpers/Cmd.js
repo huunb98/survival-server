@@ -4,7 +4,6 @@ exports.CmdId = void 0;
 exports.CmdId = {
     MOBILE_LOGIN_REQUEST: 'MOBILE_LOGIN_REQUEST',
     SET_NAME: 'SET_NAME',
-    GET_PVP_INFO: 'GET_PVP_INFO',
     GET_TOPSCORE_PVP: 'GET_TOPSCORE_PVP',
     GetMailList: '6001',
     GetMailDetail: '6002',
