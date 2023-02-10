@@ -3,7 +3,11 @@ import { Room, Client } from 'colyseus';
 import { Schema, type } from '@colyseus/schema';
 import { from, Observable, Subscription, timer } from 'rxjs';
 import { PlayerInfo } from './PlayerInfo';
-import { PVPGameState, PVPTimerConfig, PVP_MatchMarker, WinType } from './PvPConfig';
+import { PVPGameState, PVPTimerConfig, PVP_MatchMarker, WinType } from './data/PvPConfig';
+import { PvPDataDetails } from '../helpers/catalogType';
+import { leaderboardManager } from '../leaderboard/leaderboardManager';
+import { pvpHelper } from './PvPHelper';
+import { PVPDrawRewards } from './data/RankingReward';
 
 export class PVPRoom extends Room<PVPState> {
   mapPlayers: Map<string, PlayerInfo>;
@@ -47,7 +51,6 @@ export class PVPRoom extends Room<PVPState> {
           this.matchingStep++;
 
           this.setMetadata({
-            Version: options.Version,
             minElo: options.Elo - PVP_MatchMarker.MMAtackRange * this.matchingStep,
             maxElo: options.Elo + PVP_MatchMarker.MMAtackRange * this.matchingStep,
             elo: options.Elo,
@@ -83,6 +86,7 @@ export class PVPRoom extends Room<PVPState> {
 
     this.onMessage('READY_PVP', (client, message) => {
       if (this.gameState === PVPGameState.Waiting) {
+        console.log('log player ready pvp', {});
         this.mapPlayers.set(
           client.id,
           new PlayerInfo({
@@ -93,8 +97,6 @@ export class PVPRoom extends Room<PVPState> {
             Score: 0,
             MaxHP: 1000,
             CurHP: 1000,
-            TimeFinish: -1,
-            Level: message.Level,
             AvatarUrl: message.AvatarUrl,
             UserId: message.UserId,
             Status: message.Status,
@@ -102,6 +104,7 @@ export class PVPRoom extends Room<PVPState> {
             DisconnectTime: 0,
           })
         );
+        console.log(this.mapPlayers);
         this.lsPlayer.push(client.id);
 
         if (this.mapPlayers.size >= 2) {
@@ -117,11 +120,11 @@ export class PVPRoom extends Room<PVPState> {
         }
       }
 
-      client.send('READY_PVP', this.mapPlayers.get(client.id));
+      //   client.send('READY_PVP', this.mapPlayers.get(client.id));
     });
 
     this.onMessage('SEND_GAME_SCORE', (client, message) => {
-      //console.log('SEND_GAME_SCORE', message)
+      console.log('SEND_GAME_SCORE', message);
       if (this.gameState == PVPGameState.Playing) {
         this.mapPlayers.get(client.id).Score = message.Score;
         this.mapPlayers.get(client.id).MaxHP = message.MaxHP;
@@ -131,12 +134,14 @@ export class PVPRoom extends Room<PVPState> {
 
     this.onMessage('GAME_START', (client, message) => {
       this.mapPlayers.get(client.id).Status = 2;
+      console.log('on start pvp');
 
       if (this.checkGameCanStart() && this.gameState != PVPGameState.Playing) {
+        // if (this.gameState != PVPGameState.Playing) {
         this.gameState = PVPGameState.Playing;
-
+        console.log('on start pvp');
         this.broadcast('GAME_START', {
-          Time: 180,
+          Time: PVPTimerConfig.TimePlay,
           Players: [...this.mapPlayers.keys()],
         });
       }
@@ -228,11 +233,11 @@ export class PVPRoom extends Room<PVPState> {
       }
     });
 
-    let level = 1;
+    let level = pvpHelper.GetLevelByAttack(this.mapPlayers.get(this.lsPlayer[0]).Atk, this.mapPlayers.get(this.lsPlayer[1]).Atk);
 
     this.broadcast('PREPARE_PVP', {
       Level: level,
-      Time: 180,
+      Time: PVPTimerConfig.TimePlay,
       Mode: 1,
     });
   }
@@ -271,6 +276,7 @@ export class PVPRoom extends Room<PVPState> {
   }
 
   sendGameScores() {
+    console.log('send game score update');
     this.broadcast('GAME_SCORE_UPDATE', {
       Time: this.PlayTime,
       GameScores: Object.fromEntries(this.mapPlayers),
@@ -285,6 +291,8 @@ export class PVPRoom extends Room<PVPState> {
   GetGameResult() {
     let player1 = this.mapPlayers.get(this.lsPlayer[0]);
     let player2 = this.mapPlayers.get(this.lsPlayer[1]);
+
+    console.log(player1, player2);
 
     if (player1.Score == player2.Score) {
       //Hòa
@@ -311,7 +319,78 @@ export class PVPRoom extends Room<PVPState> {
   }
 
   endGame(PlayerWin: PlayerInfo, PlayerLose: PlayerInfo, isDraw: boolean, winType: WinType) {
-    console.log(PlayerWin, PlayerLose, winType);
+    console.log('on end game');
+    this.gameState = PVPGameState.Finish;
+
+    let winELO = PlayerWin.Elo + pvpHelper.GetBPBonus(PlayerWin.Elo, PlayerLose.Elo, true, isDraw);
+    let loseELO = PlayerLose.Elo + pvpHelper.GetBPBonus(PlayerLose.Elo, PlayerWin.Elo, false, isDraw);
+
+    if (loseELO < 0) loseELO = 0;
+
+    let winPlayer = {
+      DisplayName: PlayerWin.DisplayName,
+      SessionId: PlayerWin.SessionId,
+      AvatarUrl: PlayerWin.AvatarUrl,
+      UserId: PlayerWin.UserId,
+      Score: PlayerWin.Score,
+      eloPre: PlayerWin.Elo,
+      eloCur: winELO,
+      Rewards: pvpHelper.GetRewardByBP(winELO),
+    };
+
+    let losePlayer = {
+      DisplayName: PlayerLose.DisplayName,
+      SessionId: PlayerLose.SessionId,
+      AvatarUrl: PlayerLose.AvatarUrl,
+      UserId: PlayerLose.UserId,
+      Score: PlayerLose.Score,
+      eloPre: PlayerLose.Elo,
+      eloCur: loseELO,
+      Rewards: {},
+    };
+
+    if (isDraw) {
+      winPlayer.Rewards = PVPDrawRewards;
+      losePlayer.Rewards = PVPDrawRewards;
+    }
+
+    this.gameResult = {
+      IsDraw: isDraw,
+      WinnerData: winPlayer,
+      LoserData: losePlayer,
+      WinType: winType,
+    };
+
+    this.broadcast('END_GAME', {
+      IsDraw: isDraw,
+      WinnerData: winPlayer,
+      LoserData: losePlayer,
+      WinType: winType,
+    });
+
+    this.SaveDataEndGame(winPlayer, losePlayer);
+
+    setTimeout(() => {
+      try {
+        this.disconnect();
+      } catch (error) {
+        console.log(error);
+      }
+    }, 20000);
+  }
+
+  private SaveDataEndGame(PlayerWin, PlayerLose) {
+    const userWin: PvPDataDetails = {
+      UserId: PlayerWin.UserId,
+      DisplayName: PlayerWin.DisplayName,
+      AvatarUrl: PlayerWin.AvatarUrl,
+    };
+    const userLose: PvPDataDetails = {
+      UserId: PlayerLose.UserId,
+      DisplayName: PlayerLose.DisplayName,
+      AvatarUrl: PlayerLose.AvatarUrl,
+    };
+    leaderboardManager.UpdateBattlePoint(userWin, userLose, PlayerWin.eloCur, PlayerLose.eloCur);
   }
 }
 

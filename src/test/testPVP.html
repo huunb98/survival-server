@@ -53,8 +53,11 @@
 
     <br />
     <script>
-      var client = new Colyseus.Client('ws://localhost:2568');
+      var client = new Colyseus.Client('ws://localhost:3978');
       var room;
+
+      var roomName;
+
       client.joinOrCreate('pvp').then((room_instance) => {
         room = room_instance;
 
@@ -79,6 +82,8 @@
           console.log("You've been disconnected.");
         });
       });
+
+      function requestMatching() {}
 
       function start() {
         const rocketID = document.getElementById('rocketid').value;

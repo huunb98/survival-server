@@ -4,7 +4,7 @@ import { IMailSystemDocument, MailSystemModel } from '../models/mailSystem';
 import { INofityDocument, MailUpdateModel } from '../models/mailUpdate';
 import * as schedule from 'node-schedule';
 import { IMailUser, UserMailListModel } from '../models/usermaillist';
-import { IMail, MailStatus, MailType, TypeReward } from '../helpers/catalogType';
+import { IMail, IUserRank, MailStatus, MailType, TypeReward } from '../helpers/catalogType';
 import redisUtils from '../helpers/redisUtils';
 import { MAIL_USER } from './mailconfig';
 import { GetMailDetailResponse, GiftResponse } from './mailIO';
@@ -87,73 +87,84 @@ class MailManager {
   }
 
   async getMailRewardDetail(mailId: string, language: string, callback: Function) {
-    let mailUser = await UserMailListModel.findById(mailId).exec();
-
-    if (mailUser) {
-      let gifts: GiftResponse[] = [];
-      if (mailUser.gifts) {
-        gifts = Array.from(mailUser.gifts, function (item) {
-          return { key: item[0], value: +item[1] };
-        });
-      }
-      let timeEnd = new Date(mailUser.validTo).getTime();
-      let mailDetails: GetMailDetailResponse = {
-        sender: 'Jackal Squad Team',
-        status: mailUser.status,
-        title: '',
-        content: '',
-        timeEnd: timeEnd,
-        gifts: gifts,
-        type: MailType.Reward,
-      };
-
-      let mailRewards = this.rewardMails.get(mailUser.type.toString());
-      switch (mailUser.type) {
-        case TypeReward.AdminPush:
-          mailDetails.title = mailUser.title || '';
-          mailDetails.content = mailUser.content || '';
-          callback(null, mailDetails);
-          break;
-        case TypeReward.PVP:
-          if (mailRewards) {
-            mailDetails.sender = mailRewards.sender;
-            let mails = mailRewards.mail.get(language) || mailRewards.mail.get(this.defaultLanguage);
-            if (mails) {
-              mailDetails.title = mails.title;
-
-              let pvpInfo = mailUser.content.split('|');
-              mailDetails.content = mails.content.replace('{0}', pvpInfo[0]).replace('{1}', pvpInfo[1]);
-            }
-            callback(null, mailDetails);
-          } else callback('Mail not found', null);
-          break;
-        case TypeReward.UpdateVersion:
-          if (mailRewards) {
-            mailDetails.sender = mailRewards.sender;
-            let mails = mailRewards.mail.get(language) || mailRewards.mail.get(this.defaultLanguage);
-            if (mails) {
-              mailDetails.title = mails.title;
-              let version = this.updateMailById.get(mailUser.mailId) ? this.updateMailById.get(mailUser.mailId).version.toString() : '';
-              mailDetails.content = mails.content.replace('{}', version);
-            }
-            callback(null, mailDetails);
-          } else callback('Mail not found', null);
-          break;
-        default:
-          if (mailRewards) {
-            if (mailRewards) {
-              mailDetails.sender = mailRewards.sender;
-              let mails = mailRewards.mail.get(language) || mailRewards.mail.get(this.defaultLanguage);
-
-              if (mails) {
-                mailDetails.title = mails.title;
-                mailDetails.content = mails.content;
-              }
-              callback(null, mailDetails);
-            } else callback('Mail not found', null);
+    UserMailListModel.findById(mailId)
+      .then((mailUser) => {
+        if (mailUser) {
+          let gifts: GiftResponse[] = [];
+          if (mailUser.gifts) {
+            gifts = Array.from(mailUser.gifts, function (item) {
+              return { key: item[0], value: +item[1] };
+            });
           }
-      }
-    } else callback('Mail not found', null);
+          let timeEnd = new Date(mailUser.validTo).getTime();
+          let mailDetails: GetMailDetailResponse = {
+            sender: 'Jackal Squad Team',
+            status: mailUser.status,
+            title: '',
+            content: '',
+            timeEnd: timeEnd,
+            gifts: gifts,
+            type: MailType.Reward,
+          };
+
+          let mailRewards = this.rewardMails.get(mailUser.type.toString());
+          switch (mailUser.type) {
+            case TypeReward.AdminPush:
+              mailDetails.title = mailUser.title || '';
+              mailDetails.content = mailUser.content || '';
+              callback(null, mailDetails);
+              break;
+            case TypeReward.PVP:
+              if (mailRewards) {
+                mailDetails.sender = mailRewards.sender;
+                let mails = mailRewards.mail.get(language) || mailRewards.mail.get(this.defaultLanguage);
+                if (mails) {
+                  mailDetails.title = mails.title;
+
+                  let pvpInfo = JSON.parse(mailUser.content);
+                  mailDetails.content = mails.content.replace('{0}', pvpInfo.Season).replace('{1}', pvpInfo.Rank);
+                }
+                callback(null, mailDetails);
+              } else callback('Mail not found', null);
+              break;
+            case TypeReward.UpdateVersion:
+              if (mailRewards) {
+                mailDetails.sender = mailRewards.sender;
+                let mails = mailRewards.mail.get(language) || mailRewards.mail.get(this.defaultLanguage);
+                if (mails) {
+                  mailDetails.title = mails.title;
+                  let version = this.updateMailById.get(mailUser.mailId) ? this.updateMailById.get(mailUser.mailId).version.toString() : '';
+                  mailDetails.content = mails.content.replace('{}', version);
+                }
+                callback(null, mailDetails);
+              } else callback('Mail not found', null);
+              break;
+            default:
+              if (mailRewards) {
+                if (mailRewards) {
+                  mailDetails.sender = mailRewards.sender;
+                  let mails = mailRewards.mail.get(language) || mailRewards.mail.get(this.defaultLanguage);
+
+                  if (mails) {
+                    mailDetails.title = mails.title;
+                    mailDetails.content = mails.content;
+                  }
+                  callback(null, mailDetails);
+                } else callback('Mail not found', null);
+              }
+          }
+
+          if (mailUser.status === MailStatus.NEW) {
+            mailUser.status = MailStatus.READ;
+
+            mailUser.save().catch(console.error);
+          }
+        } else callback('Mail not found', null);
+      })
+      .catch((error) => {
+        callback('Database error', null);
+        console.log('Get user mail list error', error);
+      });
   }
 
   async getMailSystemDetail(mailId: string, language: string, status: MailStatus, callback: Function) {
@@ -213,6 +224,28 @@ class MailManager {
       .then()
       .catch((ex) => {
         console.log('------saveUserMails--------' + ex.name);
+      });
+  }
+
+  async sendRewardToUser(userId: string, typeReward: TypeReward, gifts, userRank: IUserRank, season: number, endDate: Date, callback: Function) {
+    let userMail = new UserMailListModel();
+    userMail.userId = userId;
+    userMail.type = typeReward;
+    userMail.validTo = endDate;
+    if (userRank) {
+      userMail.content = JSON.stringify({
+        Season: season,
+        Rank: userRank.RankNumber,
+      });
+    }
+    if (gifts) userMail.gifts = gifts;
+
+    userMail
+      .save()
+      .then((_) => callback(null, true))
+      .catch((ex) => {
+        console.log('------saveUserMails--------' + ex.name);
+        callback(true, null);
       });
   }
 }

@@ -16,10 +16,15 @@ exports.leaderboardManager = void 0;
 const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
 const initLeaderboard_1 = require("./initLeaderboard");
 const leaderboardResetManager_1 = require("./leaderboardResetManager");
+const catalogType_1 = require("./../helpers/catalogType");
+const mailManager_1 = require("../mails/mailManager");
+const PvPHelper_1 = require("../pvp/PvPHelper");
 class LeaderboardManager {
     constructor() {
         this.leaderBoardMap = new Map();
-        this.keyLeaderboard = 'LEADERBOARD:';
+        this.mapTopRanking = new Map();
+        this.keyLeaderboard = 'LEADERBOARD';
+        this.keyGame = 'JACKALSURVIVAL:';
     }
     initLeaderboard() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -38,30 +43,6 @@ class LeaderboardManager {
         this.leaderBoardMap.get(name).NextSeason = nextSeason;
         console.log(this.leaderBoardMap);
     }
-    GetPvPInfo(user, msg, fn) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let season = this.leaderBoardMap.get('PVP').Season;
-            let leaderboardName = 'LEADERBOARD:' + 'PVP' + season;
-            if (user.User.lastPVP && user.User.lastPVP < season) {
-                let lastUserScore = yield this.GetUserRank(leaderboardName, user.UserId, 'DESC');
-                /**
-                 * Trả thưởng qua mail thông qua xếp hạng rank
-                 */
-                console.log(lastUserScore);
-            }
-            else {
-                user.User.lastPVP = season;
-                user.User.save();
-            }
-            fn({
-                Status: 1,
-                Body: {
-                    Season: season,
-                    EndTime: new Date(this.leaderBoardMap.get('PVP').EndSeason).getTime(),
-                },
-            });
-        });
-    }
     /**
      * Lấy thông tin mode chơi pvp
      * Kiểm tra xem user đã chơi mùa trước hay chưa và trả thưởng
@@ -71,29 +52,13 @@ class LeaderboardManager {
      */
     GetSimpeLeaderBoard(userInfo, msg, fn) {
         return __awaiter(this, void 0, void 0, function* () {
-            let topUser = [];
             let leaderboardMode = msg.Body.LeaderBoardName;
             if (leaderboardMode != undefined && leaderboardMode != '') {
                 let season = this.leaderBoardMap.get(leaderboardMode).Season;
-                if (userInfo.User.lastPVP && userInfo.User.lastPVP < season) {
-                    let lastUserLeaderBoardName = this.keyLeaderboard + leaderboardMode + userInfo.User.lastPVP;
-                    let lastUserScore = yield exports.leaderboardManager.GetUserRank(lastUserLeaderBoardName, userInfo.UserId, 'DESC');
-                    /**
-                     * Trả thưởng qua mail thông qua xếp hạng rank
-                     */
-                    console.log(lastUserScore);
-                    userInfo.User.lastPVP = season;
-                    userInfo.User.save();
-                }
-                else if (!userInfo.User.lastPVP) {
-                    userInfo.User.lastPVP = season;
-                    userInfo.User.save();
-                }
-                let leaderBoardName = this.keyLeaderboard + leaderboardMode + season;
+                let leaderBoardName = this.keyGame + leaderboardMode + season;
+                this.CheckRewardNewSeason(userInfo, leaderboardMode, season);
                 let userScore = yield exports.leaderboardManager.GetUserRank(leaderBoardName, userInfo.UserId, 'DESC');
-                // if (!this.mapBXH.has(LeaderBoardName) || (this.mapBXH.has(LeaderBoardName) && (Date.now() - this.mapBXH.get(LeaderBoardName).TimeLoad) > 30000)) {
-                //     console.log('add Top to cache', LeaderBoardName);
-                topUser = yield exports.leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19);
+                let topUser = yield exports.leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19);
                 fn({
                     Status: 1,
                     Body: {
@@ -113,43 +78,92 @@ class LeaderboardManager {
             }
         });
     }
+    /**
+     * Trả thưởng mùa mới bằng mail thông qua xếp hạng rank
+     */
+    CheckRewardNewSeason(userInfo, leaderboardMode, season) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (userInfo.User.lastPVP && userInfo.User.lastPVP < season) {
+                let leaderBoardName = this.keyGame + leaderboardMode + userInfo.User.lastPVP;
+                const checkReward = yield this.IsMember(leaderBoardName + 'Rewards', userInfo.UserId);
+                if (!checkReward) {
+                    let lastUserScore = yield exports.leaderboardManager.GetUserRank(leaderBoardName, userInfo.UserId, 'DESC');
+                    console.log(lastUserScore);
+                    if (lastUserScore && lastUserScore.RankNumber !== -1) {
+                        let mailRewards = mailManager_1.mailManager.rewardMails.get(catalogType_1.TypeReward.PVP.toString());
+                        let endDate = new Date(Date.now() + mailRewards.expiryDate * 86400000);
+                        let gifts = PvPHelper_1.pvpHelper.GetRewardSeason(lastUserScore.RankNumber);
+                        mailManager_1.mailManager.sendRewardToUser(userInfo.UserId, catalogType_1.TypeReward.PVP, gifts, lastUserScore, season, endDate, (error, response) => {
+                            if (response)
+                                redisUtils_1.default.redisClient.SADD(leaderBoardName + 'Rewards', userInfo.UserId);
+                        });
+                    }
+                }
+                userInfo.User.lastPVP = season;
+                userInfo.User.save();
+            }
+            else if (!userInfo.User.lastPVP) {
+                userInfo.User.lastPVP = season;
+                userInfo.User.save();
+            }
+        });
+    }
+    IsMember(key, value) {
+        return new Promise((resolve, reject) => {
+            redisUtils_1.default.redisClient.SISMEMBER(key, value, (err, rs) => {
+                if (err)
+                    return reject(err);
+                rs === 1 ? resolve(true) : resolve(false);
+            });
+        });
+    }
     GetLeaderBoardWithHashDESC(LeaderBoardName, from, to) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => {
-                redisUtils_1.default.redisClient.ZREVRANGE(LeaderBoardName, from, to, 'WITHSCORES', (err, lsMember) => {
-                    if (!err) {
-                        let lsUserId = new Array();
-                        let lsScore = new Array();
-                        for (let i = 0; i < lsMember.length; i++) {
-                            if (i % 2 === 0)
-                                lsUserId.push(lsMember[i]);
+                if (!this.mapTopRanking.has(LeaderBoardName) || (this.mapTopRanking.has(LeaderBoardName) && Date.now() - this.mapTopRanking.get(LeaderBoardName).TimeLoad > 30000)) {
+                    redisUtils_1.default.redisClient.ZREVRANGE(LeaderBoardName, from, to, 'WITHSCORES', (err, lsMember) => {
+                        if (!err) {
+                            let lsUserId = new Array();
+                            let lsScore = new Array();
+                            for (let i = 0; i < lsMember.length; i++) {
+                                if (i % 2 === 0)
+                                    lsUserId.push(lsMember[i]);
+                                else
+                                    lsScore.push(lsMember[i]);
+                            }
+                            if (lsUserId.length > 0)
+                                redisUtils_1.default.redisClient.HMGET(LeaderBoardName + 'Details', lsUserId, (errDt, lsDetails) => {
+                                    if (errDt)
+                                        reject(errDt);
+                                    else {
+                                        let topUser = lsUserId.map((item, index) => {
+                                            let rs = {
+                                                RankNumber: index + from + 1,
+                                                UserId: item,
+                                                Score: Math.floor(Number(lsScore[index])),
+                                                PlayerData: JSON.parse(lsDetails[index]),
+                                            };
+                                            return rs;
+                                        });
+                                        this.mapTopRanking.set(LeaderBoardName, {
+                                            TimeLoad: Date.now(),
+                                            TopUser: topUser,
+                                        });
+                                        resolve(topUser);
+                                    }
+                                });
                             else
-                                lsScore.push(lsMember[i]);
+                                resolve([]);
                         }
-                        if (lsUserId.length > 0)
-                            redisUtils_1.default.redisClient.HMGET(LeaderBoardName + 'Details', lsUserId, (errDt, lsDetails) => {
-                                if (errDt)
-                                    reject(errDt);
-                                else {
-                                    resolve(lsUserId.map((item, index) => {
-                                        let rs = {
-                                            RankNumber: index + from + 1,
-                                            UserId: item,
-                                            Score: Math.floor(Number(lsScore[index])),
-                                            PlayerData: JSON.parse(lsDetails[index]),
-                                        };
-                                        return rs;
-                                    }));
-                                }
-                            });
-                        else
-                            resolve([]);
-                    }
-                    else {
-                        console.log(err);
-                        reject(err);
-                    }
-                });
+                        else {
+                            console.log(err);
+                            reject(err);
+                        }
+                    });
+                }
+                else {
+                    resolve(this.mapTopRanking.get(LeaderBoardName).TopUser);
+                }
             });
         });
     }
@@ -182,6 +196,19 @@ class LeaderboardManager {
                         }
                     }
                 });
+            });
+        });
+    }
+    UpdateBattlePoint(userWin, userLose, winElo, loseElo) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const season = this.leaderBoardMap.get('PVP').Season;
+            const leaderboardName = this.keyGame + 'PVP' + season;
+            const transaction = redisUtils_1.default.redisClient.multi();
+            transaction.ZADD(leaderboardName, winElo, userWin.UserId, loseElo, userLose.UserId);
+            transaction.HMSET(leaderboardName + 'Details', userWin.UserId, JSON.stringify(userWin), userLose.UserId, JSON.stringify(userLose));
+            transaction.exec((error, results) => {
+                if (error)
+                    console.log(error);
             });
         });
     }

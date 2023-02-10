@@ -15,7 +15,6 @@ const user_1 = require("../models/user");
 const ipLocation_1 = require("../utils/ipLocation");
 class Authenticate {
     Login(socket, msg, ipAdress, userInfo, fn) {
-        console.log('------- login request -----', msg);
         let appVersion = msg.Body.AppVersion;
         let deviceId = msg.Body.DeviceId;
         let platform = msg.Body.Platform;

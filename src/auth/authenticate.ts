@@ -7,7 +7,6 @@ import { ipLocation } from '../utils/ipLocation';
 
 class Authenticate {
   Login(socket: Socket, msg: RequestMsg, ipAdress: string, userInfo: UserInfo, fn: (res: LoginResponse) => void) {
-    console.log('------- login request -----', msg);
     let appVersion = msg.Body.AppVersion;
     let deviceId = msg.Body.DeviceId;
     let platform = msg.Body.Platform;

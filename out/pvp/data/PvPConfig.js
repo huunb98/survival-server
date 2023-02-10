@@ -10,7 +10,7 @@ var PVPGameState;
 })(PVPGameState = exports.PVPGameState || (exports.PVPGameState = {}));
 exports.PVPTimerConfig = {
     MaxPlayerIngame: 2,
-    TimePlay: 20,
+    TimePlay: 120,
     PrepareTime: 30,
 };
 exports.PVP_MatchMarker = {

@@ -74,5 +74,11 @@ export interface TopBPResponse {
   RankNumber: number;
   UserId: string;
   Score: number;
-  PlayerData: any;
+  PlayerData: PvPDataDetails;
+}
+
+export interface PvPDataDetails {
+  DisplayName: string;
+  AvatarUrl: string;
+  UserId: string;
 }

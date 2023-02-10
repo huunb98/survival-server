@@ -140,6 +140,34 @@ app.use('/colyseus', (0, monitor_1.monitor)({
         'elapsedTime',
     ],
 }));
+app.post('/api/match', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        //let roomName = req.body.room;
+        const roomList = yield colyseus_1.matchMaker.query({ name: 'pvp', locked: false });
+        let name = 'pvp';
+        let action = 2;
+        console.log('room list', roomList.length);
+        for (let index = 0; index < roomList.length; index++) {
+            const room = roomList[index];
+            let elo = req.body.Elo;
+            let atk = req.body.Atk;
+            if (elo && atk) {
+                name = room.roomId;
+                action = 1;
+                break;
+            }
+        }
+        console.log('----------matching request --------', req.body);
+        return res.send({
+            type: action,
+            roomName: name,
+            status: 1,
+        });
+    }
+    catch (error) {
+        return res.status(500).send('Server error!');
+    }
+}));
 server.on('error', function (e) {
     // do your thing
     console.log('http on error:' + e);

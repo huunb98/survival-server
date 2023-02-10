@@ -20,7 +20,10 @@ const colyseus_1 = require("colyseus");
 const schema_1 = require("@colyseus/schema");
 const rxjs_1 = require("rxjs");
 const PlayerInfo_1 = require("./PlayerInfo");
-const PvPConfig_1 = require("./PvPConfig");
+const PvPConfig_1 = require("./data/PvPConfig");
+const leaderboardManager_1 = require("../leaderboard/leaderboardManager");
+const PvPHelper_1 = require("./PvPHelper");
+const RankingReward_1 = require("./data/RankingReward");
 class PVPRoom extends colyseus_1.Room {
     constructor() {
         super();
@@ -50,7 +53,6 @@ class PVPRoom extends colyseus_1.Room {
                 if (secondsLapse % PvPConfig_1.PVP_MatchMarker.ReloadMakingTime == 0 && secondsLapse <= 20) {
                     this.matchingStep++;
                     this.setMetadata({
-                        Version: options.Version,
                         minElo: options.Elo - PvPConfig_1.PVP_MatchMarker.MMAtackRange * this.matchingStep,
                         maxElo: options.Elo + PvPConfig_1.PVP_MatchMarker.MMAtackRange * this.matchingStep,
                         elo: options.Elo,
@@ -87,6 +89,7 @@ class PVPRoom extends colyseus_1.Room {
         });
         this.onMessage('READY_PVP', (client, message) => {
             if (this.gameState === PvPConfig_1.PVPGameState.Waiting) {
+                console.log('log player ready pvp', {});
                 this.mapPlayers.set(client.id, new PlayerInfo_1.PlayerInfo({
                     SessionId: client.id,
                     DisplayName: message.DisplayName,
@@ -95,14 +98,13 @@ class PVPRoom extends colyseus_1.Room {
                     Score: 0,
                     MaxHP: 1000,
                     CurHP: 1000,
-                    TimeFinish: -1,
-                    Level: message.Level,
                     AvatarUrl: message.AvatarUrl,
                     UserId: message.UserId,
                     Status: message.Status,
                     TankId: message.TankId,
                     DisconnectTime: 0,
                 }));
+                console.log(this.mapPlayers);
                 this.lsPlayer.push(client.id);
                 if (this.mapPlayers.size >= 2) {
                     //
@@ -113,10 +115,10 @@ class PVPRoom extends colyseus_1.Room {
                     this.gamePrepare();
                 }
             }
-            client.send('READY_PVP', this.mapPlayers.get(client.id));
+            //   client.send('READY_PVP', this.mapPlayers.get(client.id));
         });
         this.onMessage('SEND_GAME_SCORE', (client, message) => {
-            //console.log('SEND_GAME_SCORE', message)
+            console.log('SEND_GAME_SCORE', message);
             if (this.gameState == PvPConfig_1.PVPGameState.Playing) {
                 this.mapPlayers.get(client.id).Score = message.Score;
                 this.mapPlayers.get(client.id).MaxHP = message.MaxHP;
@@ -125,10 +127,13 @@ class PVPRoom extends colyseus_1.Room {
         });
         this.onMessage('GAME_START', (client, message) => {
             this.mapPlayers.get(client.id).Status = 2;
+            console.log('on start pvp');
             if (this.checkGameCanStart() && this.gameState != PvPConfig_1.PVPGameState.Playing) {
+                // if (this.gameState != PVPGameState.Playing) {
                 this.gameState = PvPConfig_1.PVPGameState.Playing;
+                console.log('on start pvp');
                 this.broadcast('GAME_START', {
-                    Time: 180,
+                    Time: PvPConfig_1.PVPTimerConfig.TimePlay,
                     Players: [...this.mapPlayers.keys()],
                 });
             }
@@ -214,10 +219,10 @@ class PVPRoom extends colyseus_1.Room {
                 cli.leave(1003);
             }
         });
-        let level = 1;
+        let level = PvPHelper_1.pvpHelper.GetLevelByAttack(this.mapPlayers.get(this.lsPlayer[0]).Atk, this.mapPlayers.get(this.lsPlayer[1]).Atk);
         this.broadcast('PREPARE_PVP', {
             Level: level,
-            Time: 180,
+            Time: PvPConfig_1.PVPTimerConfig.TimePlay,
             Mode: 1,
         });
     }
@@ -254,6 +259,7 @@ class PVPRoom extends colyseus_1.Room {
         }
     }
     sendGameScores() {
+        console.log('send game score update');
         this.broadcast('GAME_SCORE_UPDATE', {
             Time: this.PlayTime,
             GameScores: Object.fromEntries(this.mapPlayers),
@@ -268,6 +274,7 @@ class PVPRoom extends colyseus_1.Room {
     GetGameResult() {
         let player1 = this.mapPlayers.get(this.lsPlayer[0]);
         let player2 = this.mapPlayers.get(this.lsPlayer[1]);
+        console.log(player1, player2);
         if (player1.Score == player2.Score) {
             //Hòa
             return {
@@ -294,7 +301,70 @@ class PVPRoom extends colyseus_1.Room {
         }
     }
     endGame(PlayerWin, PlayerLose, isDraw, winType) {
-        console.log(PlayerWin, PlayerLose, winType);
+        console.log('on end game');
+        this.gameState = PvPConfig_1.PVPGameState.Finish;
+        let winELO = PlayerWin.Elo + PvPHelper_1.pvpHelper.GetBPBonus(PlayerWin.Elo, PlayerLose.Elo, true, isDraw);
+        let loseELO = PlayerLose.Elo + PvPHelper_1.pvpHelper.GetBPBonus(PlayerLose.Elo, PlayerWin.Elo, false, isDraw);
+        if (loseELO < 0)
+            loseELO = 0;
+        let winPlayer = {
+            DisplayName: PlayerWin.DisplayName,
+            SessionId: PlayerWin.SessionId,
+            AvatarUrl: PlayerWin.AvatarUrl,
+            UserId: PlayerWin.UserId,
+            Score: PlayerWin.Score,
+            eloPre: PlayerWin.Elo,
+            eloCur: winELO,
+            Rewards: PvPHelper_1.pvpHelper.GetRewardByBP(winELO),
+        };
+        let losePlayer = {
+            DisplayName: PlayerLose.DisplayName,
+            SessionId: PlayerLose.SessionId,
+            AvatarUrl: PlayerLose.AvatarUrl,
+            UserId: PlayerLose.UserId,
+            Score: PlayerLose.Score,
+            eloPre: PlayerLose.Elo,
+            eloCur: loseELO,
+            Rewards: {},
+        };
+        if (isDraw) {
+            winPlayer.Rewards = RankingReward_1.PVPDrawRewards;
+            losePlayer.Rewards = RankingReward_1.PVPDrawRewards;
+        }
+        this.gameResult = {
+            IsDraw: isDraw,
+            WinnerData: winPlayer,
+            LoserData: losePlayer,
+            WinType: winType,
+        };
+        this.broadcast('END_GAME', {
+            IsDraw: isDraw,
+            WinnerData: winPlayer,
+            LoserData: losePlayer,
+            WinType: winType,
+        });
+        this.SaveDataEndGame(winPlayer, losePlayer);
+        setTimeout(() => {
+            try {
+                this.disconnect();
+            }
+            catch (error) {
+                console.log(error);
+            }
+        }, 20000);
+    }
+    SaveDataEndGame(PlayerWin, PlayerLose) {
+        const userWin = {
+            UserId: PlayerWin.UserId,
+            DisplayName: PlayerWin.DisplayName,
+            AvatarUrl: PlayerWin.AvatarUrl,
+        };
+        const userLose = {
+            UserId: PlayerLose.UserId,
+            DisplayName: PlayerLose.DisplayName,
+            AvatarUrl: PlayerLose.AvatarUrl,
+        };
+        leaderboardManager_1.leaderboardManager.UpdateBattlePoint(userWin, userLose, PlayerWin.eloCur, PlayerLose.eloCur);
     }
 }
 exports.PVPRoom = PVPRoom;
