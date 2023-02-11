@@ -82,3 +82,23 @@ export interface PvPDataDetails {
   AvatarUrl: string;
   UserId: string;
 }
+
+/**
+ * CMS
+ */
+
+export enum UserRoleCms {
+  NotExist = 0,
+  Member = 1,
+  Admin = 2,
+  Root = 3,
+}
+
+export interface LoginResponse {
+  userName: string;
+  accessToken: string;
+}
+
+export interface UserJWT {
+  user: string;
+}

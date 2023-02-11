@@ -98,6 +98,7 @@ async function OnLoginSuccess(user: IUserDocument, device: IDeviceDocument, ipAd
   return {
     Status: 1,
     Body: {
+      Avatar: user.avatar || 0,
       UserId: UserId,
       CountryCode: user.countryCode,
       DisplayName: user.displayName,

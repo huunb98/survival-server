@@ -19,7 +19,6 @@ const cors = require('cors');
 const app = express();
 const authenticate_1 = require("./auth/authenticate");
 const Cmd_1 = require("./helpers/Cmd");
-const mailRouter_1 = __importDefault(require("./routers/mailRouter"));
 const init = require("./services/init");
 const userInfo_1 = require("./user/userInfo");
 const socketIO = require("socket.io");
@@ -30,6 +29,7 @@ const monitor_1 = require("@colyseus/monitor");
 const server_1 = require("./config/environment/server");
 const leaderboardManager_1 = require("./leaderboard/leaderboardManager");
 const userService_1 = require("./user/userService");
+const apiRouter_1 = __importDefault(require("./apiRouter"));
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({
@@ -37,36 +37,7 @@ app.use(bodyParser.urlencoded({
     limit: '5mb',
 }));
 require('dotenv').config();
-app.use('/mail', mailRouter_1.default);
-app.post('/api/match', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        console.log(req.body);
-        //let roomName = req.body.room;
-        let clientVersion = req.body.Version;
-        if (clientVersion == undefined)
-            clientVersion = 0;
-        const roomList = yield colyseus_1.matchMaker.query({ name: 'pvp', locked: false });
-        let name = 'pvp';
-        let action = 2;
-        for (let index = 0; index < roomList.length; index++) {
-            const room = roomList[index];
-            const results = true;
-            if (results) {
-                name = room.roomId;
-                action = 1;
-                break;
-            }
-        }
-        return res.send({
-            type: action,
-            roomName: name,
-            status: 1,
-        });
-    }
-    catch (error) {
-        return res.status(500).send('Server error!');
-    }
-}));
+app.use('/api', apiRouter_1.default);
 const server = http.createServer(app);
 let io = socketIO(server, {
     transports: ['websocket'],
@@ -108,6 +79,9 @@ init.Init().then(() => {
         function processMsg(msg, fn) {
             return __awaiter(this, void 0, void 0, function* () {
                 switch (msg.Name) {
+                    case Cmd_1.CmdId.SET_AVATAR:
+                        userService_1.userService.SetAvatar(userInfo, msg, fn);
+                        break;
                     case Cmd_1.CmdId.SET_NAME:
                         userService_1.userService.SetName(userInfo, msg, fn);
                         break;

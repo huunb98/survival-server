@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CmdId = void 0;
 exports.CmdId = {
     MOBILE_LOGIN_REQUEST: 'MOBILE_LOGIN_REQUEST',
+    SET_AVATAR: 'SET_AVATAR',
     SET_NAME: 'SET_NAME',
     GET_TOPSCORE_PVP: 'GET_TOPSCORE_PVP',
     GetMailList: '6001',

@@ -17,6 +17,7 @@ export class LoginResponse {
     CustomData?: Object;
   };
   Body?: {
+    Avatar: number;
     UserId: string;
     CountryCode: string;
     DisplayName: string;

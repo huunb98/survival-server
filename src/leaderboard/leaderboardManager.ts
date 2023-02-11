@@ -9,7 +9,7 @@ import { mailManager } from '../mails/mailManager';
 import { pvpHelper } from '../pvp/PvPHelper';
 
 class LeaderboardManager {
-  private leaderBoardMap = new Map<string, ILeaderBoard>();
+  leaderBoardMap = new Map<string, ILeaderBoard>();
   private mapTopRanking = new Map<string, any>();
 
   readonly keyLeaderboard = 'LEADERBOARD';
@@ -110,7 +110,7 @@ class LeaderboardManager {
     });
   }
 
-  private async GetLeaderBoardWithHashDESC(LeaderBoardName: string, from: number, to: number) {
+  async GetLeaderBoardWithHashDESC(LeaderBoardName: string, from: number, to: number) {
     return new Promise<any>((resolve, reject) => {
       if (!this.mapTopRanking.has(LeaderBoardName) || (this.mapTopRanking.has(LeaderBoardName) && Date.now() - this.mapTopRanking.get(LeaderBoardName).TimeLoad > 30000)) {
         RedisUtil.redisClient.ZREVRANGE(LeaderBoardName, from, to, 'WITHSCORES', (err, lsMember) => {

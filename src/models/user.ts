@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 export interface IUser {
+  avatar: number;
   displayName: string;
   deviceId: string;
   lastPVP: number;
@@ -16,6 +17,7 @@ export interface IUserDocument extends IUser, mongoose.Document {}
 
 let userSchema = new mongoose.Schema(
   {
+    avatar: Number,
     displayName: String,
     deviceId: String,
     lastPVP: Number,

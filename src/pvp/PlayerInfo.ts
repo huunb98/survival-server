@@ -11,7 +11,7 @@ export class PlayerInfo {
   MaxHP: number;
   Elo: number;
 
-  TankId: string;
+  TankId: number;
 
   UserId: string;
   DisplayName: string;

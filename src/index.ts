@@ -5,7 +5,6 @@ const cors = require('cors');
 const app = express();
 import { authenticate } from './auth/authenticate';
 import { CmdId } from './helpers/Cmd';
-import MailRouter from './routers/mailRouter';
 import init = require('./services/init');
 import { UserInfo } from './user/userInfo';
 import socketIO = require('socket.io');
@@ -17,6 +16,7 @@ import { monitor } from '@colyseus/monitor';
 import { environment } from './config/environment/server';
 import { leaderboardManager } from './leaderboard/leaderboardManager';
 import { userService } from './user/userService';
+import ApiRouter from './apiRouter';
 
 app.use(cors());
 app.use(express.json());
@@ -28,39 +28,7 @@ app.use(
 );
 require('dotenv').config();
 
-app.use('/mail', MailRouter);
-
-app.post('/api/match', async (req: any, res) => {
-  try {
-    console.log(req.body);
-    //let roomName = req.body.room;
-    let clientVersion = req.body.Version;
-    if (clientVersion == undefined) clientVersion = 0;
-    const roomList = await matchMaker.query({ name: 'pvp', locked: false });
-
-    let name = 'pvp';
-    let action = 2;
-
-    for (let index = 0; index < roomList.length; index++) {
-      const room = roomList[index];
-
-      const results = true;
-      if (results) {
-        name = room.roomId;
-        action = 1;
-        break;
-      }
-    }
-
-    return res.send({
-      type: action,
-      roomName: name,
-      status: 1,
-    });
-  } catch (error) {
-    return res.status(500).send('Server error!');
-  }
-});
+app.use('/api', ApiRouter);
 
 const server = http.createServer(app);
 
@@ -108,6 +76,9 @@ init.Init().then(() => {
 
     async function processMsg(msg, fn) {
       switch (msg.Name) {
+        case CmdId.SET_AVATAR:
+          userService.SetAvatar(userInfo, msg, fn);
+          break;
         case CmdId.SET_NAME:
           userService.SetName(userInfo, msg, fn);
           break;

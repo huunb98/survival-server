@@ -98,6 +98,7 @@ function OnLoginSuccess(user, device, ipAdress, userInfo) {
         return {
             Status: 1,
             Body: {
+                Avatar: user.avatar || 0,
                 UserId: UserId,
                 CountryCode: user.countryCode,
                 DisplayName: user.displayName,
