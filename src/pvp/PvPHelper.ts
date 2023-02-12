@@ -4,13 +4,11 @@ import { PVPRewardEndGame, PVPRewardSeason } from './data/RankingReward';
 
 class PvPHelper {
   GetLevelByAttack(atk1: number, atk2: number): number {
-    console.log('get level', atk1, (atk1 + atk2) / 2);
     let attack = (atk1 + atk2) / 2;
     let level = 1;
     for (let i = 0; i < PVPAttackLevel.length; i++) {
       if (attack >= PVPAttackLevel[i].attack[0] && attack < PVPAttackLevel[i].attack[1]) {
         level = this.randomIntFromInterval(PVPAttackLevel[i].level[0], PVPAttackLevel[i].level[1]);
-        console.log('results level', level);
         break;
       }
     }

@@ -6,13 +6,11 @@ const PVPAttackLevel_1 = require("./data/PVPAttackLevel");
 const RankingReward_1 = require("./data/RankingReward");
 class PvPHelper {
     GetLevelByAttack(atk1, atk2) {
-        console.log('get level', atk1, (atk1 + atk2) / 2);
         let attack = (atk1 + atk2) / 2;
         let level = 1;
         for (let i = 0; i < PVPAttackLevel_1.PVPAttackLevel.length; i++) {
             if (attack >= PVPAttackLevel_1.PVPAttackLevel[i].attack[0] && attack < PVPAttackLevel_1.PVPAttackLevel[i].attack[1]) {
                 level = this.randomIntFromInterval(PVPAttackLevel_1.PVPAttackLevel[i].level[0], PVPAttackLevel_1.PVPAttackLevel[i].level[1]);
-                console.log('results level', level);
                 break;
             }
         }

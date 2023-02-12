@@ -62,7 +62,6 @@ class PVPRoom extends colyseus_1.Room {
                 }
                 //thêm dk 30s không tìm được người chơi thì đóng room;
                 this.TimeDisposeRoom--;
-                console.log(this.TimeDisposeRoom);
                 if (this.TimeDisposeRoom < 0) {
                     subscribe.unsubscribe();
                     this.disconnect();
@@ -89,7 +88,6 @@ class PVPRoom extends colyseus_1.Room {
         });
         this.onMessage('READY_PVP', (client, message) => {
             if (this.gameState === PvPConfig_1.PVPGameState.Waiting) {
-                console.log('log player ready pvp', {});
                 this.mapPlayers.set(client.id, new PlayerInfo_1.PlayerInfo({
                     SessionId: client.id,
                     DisplayName: message.DisplayName,
@@ -104,10 +102,8 @@ class PVPRoom extends colyseus_1.Room {
                     TankId: message.TankId,
                     DisconnectTime: 0,
                 }));
-                console.log(this.mapPlayers);
                 this.lsPlayer.push(client.id);
                 if (this.mapPlayers.size >= 2) {
-                    //
                     this.broadcast('ENERMY_READY_PVP', this.mapPlayers.get(client.id), {
                         except: client,
                     });
@@ -127,11 +123,9 @@ class PVPRoom extends colyseus_1.Room {
         });
         this.onMessage('GAME_START', (client, message) => {
             this.mapPlayers.get(client.id).Status = 2;
-            console.log('on start pvp');
             if (this.checkGameCanStart() && this.gameState != PvPConfig_1.PVPGameState.Playing) {
                 // if (this.gameState != PVPGameState.Playing) {
                 this.gameState = PvPConfig_1.PVPGameState.Playing;
-                console.log('on start pvp');
                 this.broadcast('GAME_START', {
                     Time: PvPConfig_1.PVPTimerConfig.TimePlay,
                     Players: [...this.mapPlayers.keys()],
@@ -259,7 +253,6 @@ class PVPRoom extends colyseus_1.Room {
         }
     }
     sendGameScores() {
-        console.log('send game score update');
         this.broadcast('GAME_SCORE_UPDATE', {
             Time: this.PlayTime,
             GameScores: Object.fromEntries(this.mapPlayers),
@@ -274,7 +267,6 @@ class PVPRoom extends colyseus_1.Room {
     GetGameResult() {
         let player1 = this.mapPlayers.get(this.lsPlayer[0]);
         let player2 = this.mapPlayers.get(this.lsPlayer[1]);
-        console.log(player1, player2);
         if (player1.Score == player2.Score) {
             //Hòa
             return {
@@ -301,7 +293,6 @@ class PVPRoom extends colyseus_1.Room {
         }
     }
     endGame(PlayerWin, PlayerLose, isDraw, winType) {
-        console.log('on end game');
         this.gameState = PvPConfig_1.PVPGameState.Finish;
         let winELO = PlayerWin.Elo + PvPHelper_1.pvpHelper.GetBPBonus(PlayerWin.Elo, PlayerLose.Elo, true, isDraw);
         let loseELO = PlayerLose.Elo + PvPHelper_1.pvpHelper.GetBPBonus(PlayerLose.Elo, PlayerWin.Elo, false, isDraw);

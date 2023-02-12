@@ -50,16 +50,17 @@ class JwtAuthenticate {
             return res.status(401).send({
                 code: 0,
                 data: null,
-                msg: 'Token missing',
+                message: 'Token missing',
             });
         jwt.verify(token, process.env.ServerAccessToken, (err, response) => {
             if (err)
                 return res.status(403).send({
                     code: 0,
                     data: err,
-                    msg: 'Forbiden',
+                    message: 'Forbiden',
                 });
             res.locals.user = response.user;
+            res.locals.role = response.role;
             next();
         });
     }

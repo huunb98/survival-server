@@ -15,6 +15,11 @@ class PVPConfigManger {
     UpdatePVPConfig(pvpLeaderboard, timePlay) {
         if (timePlay)
             PvPConfig_1.PVPTimerConfig.TimePlay = timePlay;
+        let leaderboard = leaderboardManager_1.leaderboardManager.leaderBoardMap.get('PVP');
+        return {
+            TimePlay: PvPConfig_1.PVPTimerConfig.TimePlay,
+            Leaderboard: leaderboard,
+        };
     }
 }
 exports.PVPConfigManger = PVPConfigManger;

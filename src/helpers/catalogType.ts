@@ -94,11 +94,13 @@ export enum UserRoleCms {
   Root = 3,
 }
 
-export interface LoginResponse {
+export interface LoginResponseCms {
   userName: string;
   accessToken: string;
+  role: UserRoleCms;
 }
 
 export interface UserJWT {
   user: string;
+  role: UserRoleCms;
 }

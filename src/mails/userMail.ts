@@ -86,7 +86,6 @@ class UserMail {
   }
 
   getMailDetails(userId: string, mailId: string, type: MailType, language: string, callback: Function) {
-    console.log(userId, mailId, type, language);
     switch (type) {
       case MailType.System:
         RedisUtils.HGET(MAIL_USER + mailId, userId, (error, status) => {

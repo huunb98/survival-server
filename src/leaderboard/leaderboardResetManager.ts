@@ -49,9 +49,13 @@ export class LeaderBoardResetManager {
   }
 
   private DeleteOldLeaderboard(Name: string) {
-    RedisUtil.redisClient.DEL(Name, (err, rs) => {});
-    RedisUtil.redisClient.DEL(Name + 'Details', (err, rs) => {
-      console.log('delete ', Name);
+    let transaction = RedisUtil.redisClient.multi();
+    transaction.DEL(Name);
+    transaction.DEL(Name + 'Details');
+    transaction.DEL(Name + 'Rewards');
+    transaction.exec((error, response) => {
+      if (error) console.log(error);
+      else console.log('delete ', Name);
     });
   }
 

@@ -11,18 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userCmsController = void 0;
 const jwtAuthen_1 = require("../auth/jwt/jwtAuthen");
-const catalogType_1 = require("../helpers/catalogType");
+const bcrypt_1 = require("../helpers/bcrypt");
 const usercms_1 = require("../models/usercms");
 class UserCmsController {
-    createUser(userName, email, password, role, adminId, callback) {
+    createUser(userName, email, password, role, callback) {
         return __awaiter(this, void 0, void 0, function* () {
-            let userRole = yield this.getPermission(adminId);
-            if (userRole < role)
-                return callback('Not permission', null);
             let newUser = new usercms_1.UserCmsModel();
             newUser.userName = userName;
             newUser.email = email;
-            newUser.password = password;
+            newUser.password = yield new bcrypt_1.BcryptHelper().encode(password);
             newUser.role = role;
             newUser
                 .save()
@@ -35,39 +32,31 @@ class UserCmsController {
         });
     }
     login(email, password, callback) {
-        usercms_1.UserCmsModel.findOne({ email: email, password: password })
-            .then((user) => {
+        usercms_1.UserCmsModel.findOne({ email: email })
+            .then((user) => __awaiter(this, void 0, void 0, function* () {
             if (user) {
+                let validPassword = yield new bcrypt_1.BcryptHelper().compareHash(password, user.password);
+                if (!validPassword)
+                    return callback('Email not found or password is invalid', null);
                 let userJWT = {
                     user: user.id,
+                    role: user.role,
                 };
                 let accessToken = jwtAuthen_1.jwtAuthenticate.generateAccessToken(userJWT);
                 let loginRes = {
                     userName: user.userName,
                     accessToken: accessToken,
+                    role: user.role,
                 };
                 callback(null, loginRes);
             }
             else {
                 callback('Email not found or password is invalid', null);
             }
-        })
+        }))
             .catch((error) => {
             callback('Database error', null);
         });
-    }
-    getPermission(id) {
-        return new Promise((resolve, reject) => usercms_1.UserCmsModel.findOne({ _id: id }, { role: 1, _id: 0 })
-            .then((user) => {
-            if (user)
-                resolve(user.role);
-            else
-                resolve(catalogType_1.UserRoleCms.NotExist);
-        })
-            .catch((error) => {
-            console.log(error);
-            reject(catalogType_1.UserRoleCms.NotExist);
-        }));
     }
 }
 exports.userCmsController = new UserCmsController();

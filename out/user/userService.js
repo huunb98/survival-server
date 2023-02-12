@@ -4,7 +4,6 @@ exports.userService = void 0;
 const user_1 = require("../models/user");
 class UserService {
     SetAvatar(userInfo, msg, fn) {
-        console.log(msg);
         let _avatar = msg.Body.Avatar;
         if (_avatar == null || _avatar == undefined) {
             fn({
@@ -28,7 +27,6 @@ class UserService {
         });
     }
     SetName(userInfo, msg, fn) {
-        console.log(msg);
         let displayName = msg.Body.DisplayName;
         if (!displayName) {
             fn({

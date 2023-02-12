@@ -27,7 +27,7 @@ MailRouter.route('/mailSystem')
     let errorList = error.array();
     let giftError = false;
     let gifts = new Map();
-    console.log(req.body);
+    // console.log(req.body);
     if (req.body.gifts) {
         gifts = req.body.gifts;
         if (typeof gifts != 'object') {
@@ -75,7 +75,7 @@ MailRouter.route('/mailSystem')
 });
 MailRouter.route('/mailUpdate')
     .get((0, express_validator_1.check)('language').exists({ checkFalsy: true, checkNull: true }), function (req, res) {
-    console.log('get mail update request', req.query);
+    //console.log('get mail update request', req.query);
     let error = (0, express_validator_1.validationResult)(req);
     let errorList = error.array();
     if (errorList.length)
@@ -86,7 +86,7 @@ MailRouter.route('/mailUpdate')
             res.status(400).send(error);
             return;
         }
-        console.log('rs mail update', response);
+        // console.log('rs mail update', response);
         res.send(response);
     });
 })
@@ -95,7 +95,7 @@ MailRouter.route('/mailUpdate')
     let errorList = error.array();
     let giftError = false;
     let gifts = new Map();
-    console.log(req.body);
+    //  console.log(req.body);
     if (req.body.gifts) {
         gifts = req.body.gifts;
         if (typeof gifts != 'object') {
@@ -143,7 +143,7 @@ MailRouter.route('/mailUpdate')
 });
 MailRouter.route('/mailReward')
     .get((0, express_validator_1.check)('language').exists({ checkFalsy: true, checkNull: true }), function (req, res) {
-    console.log('get mail reward request', req.query);
+    // console.log('get mail reward request', req.query);
     let error = (0, express_validator_1.validationResult)(req);
     let errorList = error.array();
     if (errorList.length)
@@ -154,17 +154,17 @@ MailRouter.route('/mailReward')
             res.status(400).send(error);
             return;
         }
-        console.log('rs mail reward', response);
+        //  console.log('rs mail reward', response);
         res.send(response);
     });
 })
     .post((0, express_validator_1.check)('type').exists({ checkFalsy: true, checkNull: true }), (0, express_validator_1.check)('content').exists({ checkFalsy: true, checkNull: true }), (0, express_validator_1.check)('title').exists({ checkFalsy: true, checkNull: true }), (0, express_validator_1.check)('expiryDate').exists({ checkFalsy: true, checkNull: true }), function (req, res) {
-    console.log(req.body);
+    //   console.log(req.body);
     let error = (0, express_validator_1.validationResult)(req);
     let errorList = error.array();
     let giftError = false;
     let gifts = new Map();
-    console.log(req.body);
+    //  console.log(req.body);
     if (req.body.gifts) {
         gifts = req.body.gifts;
         if (typeof gifts != 'object') {
@@ -213,16 +213,14 @@ MailRouter.route('/mailReward')
 MailRouter.post('/mailDetail', (0, express_validator_1.check)('mailId').exists({ checkFalsy: true, checkNull: true }), (0, express_validator_1.check)('mailType').exists({ checkNull: true }), function (req, res) {
     let error = (0, express_validator_1.validationResult)(req);
     let errorList = error.array();
-    console.log(req.body);
+    // console.log(req.body);
     if (errorList.length)
         return res.status(400).send('Invalid parameter');
     new mailCms_1.default().getMailDetails(req.body.mailId, req.body.mailType, (error, response) => {
         if (error) {
-            console.log('error');
             res.status(400).send(error);
             return;
         }
-        console.log('result');
         res.send(response);
     });
 });

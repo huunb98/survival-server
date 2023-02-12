@@ -1,9 +1,6 @@
-import { Router } from 'express';
 import { matchMaker } from 'colyseus';
 
-var MatchRouter = Router();
-
-MatchRouter.use('', async (req, res) => {
+export default async function MatchingPVP(req, res) {
   try {
     console.log(req.body);
     //let roomName = req.body.room;
@@ -33,6 +30,4 @@ MatchRouter.use('', async (req, res) => {
   } catch (error) {
     return res.status(500).send('Server error!');
   }
-});
-
-export default MatchRouter;
+}

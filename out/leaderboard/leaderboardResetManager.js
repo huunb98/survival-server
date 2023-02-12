@@ -55,9 +55,15 @@ class LeaderBoardResetManager {
         });
     }
     DeleteOldLeaderboard(Name) {
-        redisUtils_1.default.redisClient.DEL(Name, (err, rs) => { });
-        redisUtils_1.default.redisClient.DEL(Name + 'Details', (err, rs) => {
-            console.log('delete ', Name);
+        let transaction = redisUtils_1.default.redisClient.multi();
+        transaction.DEL(Name);
+        transaction.DEL(Name + 'Details');
+        transaction.DEL(Name + 'Rewards');
+        transaction.exec((error, response) => {
+            if (error)
+                console.log(error);
+            else
+                console.log('delete ', Name);
         });
     }
     /**

@@ -64,7 +64,6 @@ class MailController {
     if (mailUpdate) userMailList = userMailList.concat(userMail.getMailOverview(COUNTRY_LANGUAGE[contryCode], [mailUpdate], true));
     if (mailListPrivate) userMailList = userMailList.concat(await userMail.getPrivateMail(COUNTRY_LANGUAGE[contryCode], mailListPrivate));
 
-    console.log(userMailList.length);
     callback({
       Status: 1,
       Body: {
@@ -88,8 +87,6 @@ class MailController {
 
       if (!mailUpdate) return Promise.resolve(null);
 
-      console.log(userId, platform, appVersion, createdAt);
-      console.log(mailUpdate.version);
       const gifts = mailUpdate.gifts;
 
       if (createdAt > new Date(mailUpdate.createdAt)) return Promise.resolve(null);
@@ -144,7 +141,6 @@ class MailController {
   }
 
   getMailDetail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
-    console.log('user country code', userInfo.CountryCode);
     let countryCode = userInfo.CountryCode || 'US';
     userMail.getMailDetails(userInfo.UserId, msg.Body.MailId, msg.Body.Type, COUNTRY_LANGUAGE[countryCode], (err, result) => {
       if (err) {

@@ -118,7 +118,6 @@ class UserMail {
         });
     }
     getMailDetails(userId, mailId, type, language, callback) {
-        console.log(userId, mailId, type, language);
         switch (type) {
             case catalogType_1.MailType.System:
                 redisUtils_1.default.HGET(mailconfig_1.MAIL_USER + mailId, userId, (error, status) => {

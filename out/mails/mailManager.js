@@ -93,7 +93,6 @@ class MailManager {
         this.getMailConfig();
     }
     getMail(id, isUpdate, language) {
-        console.log(id, isUpdate, language);
         let mailMap = isUpdate ? this.updateMailById.get(id) : this.systemMails.get(id);
         if (mailMap) {
             let mailContent = mailMap.mail.get(language) || mailMap.mail.get(this.defaultLanguage);

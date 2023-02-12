@@ -1,15 +1,14 @@
 import { jwtAuthenticate } from '../auth/jwt/jwtAuthen';
-import { UserRoleCms, LoginResponse, UserJWT } from '../helpers/catalogType';
+import { BcryptHelper } from '../helpers/bcrypt';
+import { UserRoleCms, LoginResponseCms, UserJWT } from '../helpers/catalogType';
 import { UserCmsModel } from '../models/usercms';
 
 class UserCmsController {
-  async createUser(userName: string, email: string, password: string, role: UserRoleCms, adminId: string, callback: Function) {
-    let userRole = await this.getPermission(adminId);
-    if (userRole < role) return callback('Not permission', null);
+  async createUser(userName: string, email: string, password: string, role: UserRoleCms, callback: Function) {
     let newUser = new UserCmsModel();
     newUser.userName = userName;
     newUser.email = email;
-    newUser.password = password;
+    newUser.password = await new BcryptHelper().encode(password);
     newUser.role = role;
 
     newUser
@@ -23,16 +22,22 @@ class UserCmsController {
   }
 
   login(email: string, password: string, callback: Function) {
-    UserCmsModel.findOne({ email: email, password: password })
-      .then((user) => {
+    UserCmsModel.findOne({ email: email })
+      .then(async (user) => {
         if (user) {
+          let validPassword = await new BcryptHelper().compareHash(password, user.password);
+          if (!validPassword) return callback('Email not found or password is invalid', null);
+
           let userJWT: UserJWT = {
             user: user.id,
+            role: user.role,
           };
+
           let accessToken = jwtAuthenticate.generateAccessToken(userJWT);
-          let loginRes: LoginResponse = {
+          let loginRes: LoginResponseCms = {
             userName: user.userName,
             accessToken: accessToken,
+            role: user.role,
           };
           callback(null, loginRes);
         } else {
@@ -42,20 +47,6 @@ class UserCmsController {
       .catch((error) => {
         callback('Database error', null);
       });
-  }
-
-  getPermission(id: string): Promise<UserRoleCms> {
-    return new Promise<UserRoleCms>((resolve, reject) =>
-      UserCmsModel.findOne({ _id: id }, { role: 1, _id: 0 })
-        .then((user) => {
-          if (user) resolve(user.role);
-          else resolve(UserRoleCms.NotExist);
-        })
-        .catch((error) => {
-          console.log(error);
-          reject(UserRoleCms.NotExist);
-        })
-    );
   }
 }
 

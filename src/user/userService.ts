@@ -4,7 +4,6 @@ import { UserInfo } from './userInfo';
 
 class UserService {
   SetAvatar(userInfo: UserInfo, msg: RequestMsg, fn: (res: RespsoneMsg) => void) {
-    console.log(msg);
     let _avatar = msg.Body.Avatar;
     if (_avatar == null || _avatar == undefined) {
       fn({
@@ -30,7 +29,6 @@ class UserService {
   }
 
   SetName(userInfo: UserInfo, msg: RequestMsg, fn: (res: RespsoneMsg) => void) {
-    console.log(msg);
     let displayName = msg.Body.DisplayName;
     if (!displayName) {
       fn({

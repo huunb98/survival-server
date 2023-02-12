@@ -1,8 +1,6 @@
-export interface UserJWT {
-  user: string;
-}
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
+import { UserJWT } from '../../helpers/catalogType';
 
 class JwtAuthenticate {
   /**
@@ -32,16 +30,17 @@ class JwtAuthenticate {
       return res.status(401).send({
         code: 0,
         data: null,
-        msg: 'Token missing',
+        message: 'Token missing',
       });
     jwt.verify(token, process.env.ServerAccessToken, (err, response: UserJWT) => {
       if (err)
         return res.status(403).send({
           code: 0,
           data: err,
-          msg: 'Forbiden',
+          message: 'Forbiden',
         });
       res.locals.user = response.user;
+      res.locals.role = response.role;
       next();
     });
   }
