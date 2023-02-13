@@ -49,6 +49,24 @@ class UserService {
             });
         });
     }
+    GetBasicInfo(userId, callback) {
+        user_1.UserModel.findById(userId, { avatar: 1, displayName: 1, _id: 0 })
+            .then((user) => {
+            if (user) {
+                callback(null, {
+                    avatar: user.avatar,
+                    displayName: user.displayName,
+                });
+            }
+            else {
+                callback('user not found', null);
+            }
+        })
+            .catch((error) => {
+            console.log(error);
+            callback('server is error', null);
+        });
+    }
 }
 exports.userService = new UserService();
 //# sourceMappingURL=userService.js.map

@@ -23,7 +23,7 @@ class LeaderboardManager {
     constructor() {
         this.leaderBoardMap = new Map();
         this.mapTopRanking = new Map();
-        this.keyLeaderboard = 'LEADERBOARD';
+        this.keyLeaderboard = 'JACKALSURVIVAL:LEADERBOARD';
         this.keyGame = 'JACKALSURVIVAL:';
     }
     initLeaderboard() {
@@ -206,6 +206,19 @@ class LeaderboardManager {
             const transaction = redisUtils_1.default.redisClient.multi();
             transaction.ZADD(leaderboardName, winElo, userWin.UserId, loseElo, userLose.UserId);
             transaction.HMSET(leaderboardName + 'Details', userWin.UserId, JSON.stringify(userWin), userLose.UserId, JSON.stringify(userLose));
+            transaction.exec((error, results) => {
+                if (error)
+                    console.log(error);
+            });
+        });
+    }
+    SetBattlePoint(user, bp) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const season = this.leaderBoardMap.get('PVP').Season;
+            const leaderboardName = this.keyGame + 'PVP' + season;
+            const transaction = redisUtils_1.default.redisClient.multi();
+            transaction.ZADD(leaderboardName, bp, user.UserId);
+            transaction.HMSET(leaderboardName + 'Details', user.UserId, JSON.stringify(user));
             transaction.exec((error, results) => {
                 if (error)
                     console.log(error);

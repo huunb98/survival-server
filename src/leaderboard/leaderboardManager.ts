@@ -12,7 +12,7 @@ class LeaderboardManager {
   leaderBoardMap = new Map<string, ILeaderBoard>();
   private mapTopRanking = new Map<string, any>();
 
-  readonly keyLeaderboard = 'LEADERBOARD';
+  readonly keyLeaderboard = 'JACKALSURVIVAL:LEADERBOARD';
   readonly keyGame = 'JACKALSURVIVAL:';
 
   async initLeaderboard() {
@@ -189,6 +189,17 @@ class LeaderboardManager {
     transaction.ZADD(leaderboardName, winElo, userWin.UserId, loseElo, userLose.UserId);
     transaction.HMSET(leaderboardName + 'Details', userWin.UserId, JSON.stringify(userWin), userLose.UserId, JSON.stringify(userLose));
 
+    transaction.exec((error, results) => {
+      if (error) console.log(error);
+    });
+  }
+
+  async SetBattlePoint(user: PvPDataDetails, bp: number) {
+    const season = this.leaderBoardMap.get('PVP').Season;
+    const leaderboardName = this.keyGame + 'PVP' + season;
+    const transaction = RedisUtil.redisClient.multi();
+    transaction.ZADD(leaderboardName, bp, user.UserId);
+    transaction.HMSET(leaderboardName + 'Details', user.UserId, JSON.stringify(user));
     transaction.exec((error, results) => {
       if (error) console.log(error);
     });

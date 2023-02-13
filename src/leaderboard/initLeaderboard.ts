@@ -3,7 +3,7 @@ import redisUtil from '../helpers/redisUtils';
 import { ILeaderBoard } from '../models/leaderboard';
 
 async function InitLeaderboard(Name: string): Promise<ILeaderBoard> {
-  let lsKeyCfg = await GetMultiLeaderBoardConfig('LEADERBOARD', [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`]);
+  let lsKeyCfg = await GetMultiLeaderBoardConfig('JACKALSURVIVAL:LEADERBOARD', [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`]);
   let leaderboard = new ILeaderBoard();
   leaderboard.Name = Name;
 
@@ -13,11 +13,7 @@ async function InitLeaderboard(Name: string): Promise<ILeaderBoard> {
     leaderboard.SeasonTime = 14;
     leaderboard.EndSeason = dateHelper.NextMonday();
     leaderboard.NextSeason = dateHelper.NextMonday();
-    redisUtil.SetMultiLeaderBoard(
-      'LEADERBOARD',
-      [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`],
-      [leaderboard.Season, leaderboard.SeasonTime, leaderboard.EndSeason.toLocaleString(), leaderboard.NextSeason.toLocaleString()]
-    );
+    SetLeaderBoard(Name, leaderboard);
   } else {
     leaderboard.Season = Number(lsKeyCfg[0]);
     leaderboard.SeasonTime = Number(lsKeyCfg[1]);
@@ -25,6 +21,14 @@ async function InitLeaderboard(Name: string): Promise<ILeaderBoard> {
     leaderboard.NextSeason = new Date(lsKeyCfg[3]);
   }
   return Promise.resolve(leaderboard);
+}
+
+function SetLeaderBoard(Name: string, leaderboard: ILeaderBoard) {
+  redisUtil.SetMultiLeaderBoard(
+    'JACKALSURVIVAL:LEADERBOARD',
+    [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`],
+    [leaderboard.Season, leaderboard.SeasonTime, leaderboard.EndSeason.toLocaleString(), leaderboard.NextSeason.toLocaleString()]
+  );
 }
 
 function GetMultiLeaderBoardConfig(key: string, name: any[]): Promise<any> {
@@ -40,4 +44,4 @@ function CheckArrayNull(arr: any[]) {
   return arr.some((index: any) => index === null);
 }
 
-export { InitLeaderboard };
+export { InitLeaderboard, SetLeaderBoard };

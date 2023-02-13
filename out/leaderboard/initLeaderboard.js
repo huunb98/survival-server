@@ -12,13 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InitLeaderboard = void 0;
+exports.SetLeaderBoard = exports.InitLeaderboard = void 0;
 const dateHelper_1 = require("../helpers/dateHelper");
 const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
 const leaderboard_1 = require("../models/leaderboard");
 function InitLeaderboard(Name) {
     return __awaiter(this, void 0, void 0, function* () {
-        let lsKeyCfg = yield GetMultiLeaderBoardConfig('LEADERBOARD', [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`]);
+        let lsKeyCfg = yield GetMultiLeaderBoardConfig('JACKALSURVIVAL:LEADERBOARD', [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`]);
         let leaderboard = new leaderboard_1.ILeaderBoard();
         leaderboard.Name = Name;
         if (CheckArrayNull(lsKeyCfg)) {
@@ -27,7 +27,7 @@ function InitLeaderboard(Name) {
             leaderboard.SeasonTime = 14;
             leaderboard.EndSeason = dateHelper_1.dateHelper.NextMonday();
             leaderboard.NextSeason = dateHelper_1.dateHelper.NextMonday();
-            redisUtils_1.default.SetMultiLeaderBoard('LEADERBOARD', [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`], [leaderboard.Season, leaderboard.SeasonTime, leaderboard.EndSeason.toLocaleString(), leaderboard.NextSeason.toLocaleString()]);
+            SetLeaderBoard(Name, leaderboard);
         }
         else {
             leaderboard.Season = Number(lsKeyCfg[0]);
@@ -39,6 +39,10 @@ function InitLeaderboard(Name) {
     });
 }
 exports.InitLeaderboard = InitLeaderboard;
+function SetLeaderBoard(Name, leaderboard) {
+    redisUtils_1.default.SetMultiLeaderBoard('JACKALSURVIVAL:LEADERBOARD', [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`], [leaderboard.Season, leaderboard.SeasonTime, leaderboard.EndSeason.toLocaleString(), leaderboard.NextSeason.toLocaleString()]);
+}
+exports.SetLeaderBoard = SetLeaderBoard;
 function GetMultiLeaderBoardConfig(key, name) {
     let promise = new Promise((resolve, reject) => {
         redisUtils_1.default.redisClient.HMGET(key, name, function (err, result) {

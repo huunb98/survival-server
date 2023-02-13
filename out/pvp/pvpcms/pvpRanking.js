@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PVPRanking = void 0;
 const redisUtils_1 = __importDefault(require("../../helpers/redisUtils"));
 const leaderboardManager_1 = require("../../leaderboard/leaderboardManager");
+const userService_1 = require("../../user/userService");
 class PVPRanking {
     constructor() {
         this.keyPVP = 'JACKALSURVIVAL:PVP';
@@ -24,6 +25,22 @@ class PVPRanking {
             let leaderBoardName = this.keyPVP + leaderboardManager_1.leaderboardManager.leaderBoardMap.get('PVP').Season;
             let topUser = yield leaderboardManager_1.leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19);
             return topUser;
+        });
+    }
+    setBattlePoint(userId, bp, callback) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(userId, bp);
+            userService_1.userService.GetBasicInfo(userId, (error, response) => {
+                if (error)
+                    return callback(error, null);
+                let user = {
+                    UserId: userId,
+                    DisplayName: response.displayName,
+                    AvatarUrl: response.avatar,
+                };
+                leaderboardManager_1.leaderboardManager.SetBattlePoint(user, bp);
+                callback(null, 'success');
+            });
         });
     }
     deleteUserLoadboard(userId, callback) {

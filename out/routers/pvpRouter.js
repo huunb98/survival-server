@@ -21,6 +21,18 @@ PvPRouter.route('/leaderboard')
         res.send(topPVP);
     });
 })
+    .post((0, express_validator_1.check)('userId').exists({ checkFalsy: true, checkNull: true }), (0, express_validator_1.check)('score').isInt(), function (req, res) {
+    let error = (0, express_validator_1.validationResult)(req);
+    let errorList = error.array();
+    if (errorList.length)
+        return res.status(400).send(errorList);
+    new pvpRanking_1.PVPRanking().setBattlePoint(req.body.userId, req.body.score, (error, response) => {
+        if (error)
+            res.status(400).send(error);
+        else
+            res.send(response);
+    });
+})
     .delete((0, express_validator_1.check)('userId').exists({ checkFalsy: true, checkNull: true }), function (req, res) {
     let error = (0, express_validator_1.validationResult)(req);
     let errorList = error.array();
@@ -38,7 +50,8 @@ PvPRouter.route('/config')
     res.send(config);
 })
     .patch((req, res) => {
-    let results = new pvpConfigManager_1.PVPConfigManger().UpdatePVPConfig(null, req.body.timePlay);
+    console.log(req.body);
+    let results = new pvpConfigManager_1.PVPConfigManger().UpdatePVPConfig(req.body.leaderboard, req.body.timePlay);
     res.send(results);
 });
 exports.default = PvPRouter;

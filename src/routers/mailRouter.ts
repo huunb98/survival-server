@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 import { version } from 'os';
 import MailCMS from '../mails/mailCms';
+import { mailManager } from '../mails/mailManager';
 
 var MailRouter = Router();
 
@@ -269,5 +270,13 @@ MailRouter.post(
     });
   }
 );
+
+MailRouter.post('/reloadConfig', (req, res) => {
+  mailManager.reloadConfig();
+  res.send({
+    Status: 1,
+    Body: {},
+  });
+});
 
 export default MailRouter;

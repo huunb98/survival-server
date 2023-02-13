@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const express_validator_1 = require("express-validator");
 const mailCms_1 = __importDefault(require("../mails/mailCms"));
+const mailManager_1 = require("../mails/mailManager");
 var MailRouter = (0, express_1.Router)();
 MailRouter.route('/mailSystem')
     .get((0, express_validator_1.check)('language').exists({ checkFalsy: true, checkNull: true }), function (req, res) {
@@ -222,6 +223,13 @@ MailRouter.post('/mailDetail', (0, express_validator_1.check)('mailId').exists({
             return;
         }
         res.send(response);
+    });
+});
+MailRouter.post('/reloadConfig', (req, res) => {
+    mailManager_1.mailManager.reloadConfig();
+    res.send({
+        Status: 1,
+        Body: {},
     });
 });
 exports.default = MailRouter;
