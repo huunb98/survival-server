@@ -44,9 +44,9 @@ class PvPHelper {
     GetRewardByBP(bp) {
         for (let index = 0; index < RankingReward_1.PVPRewardEndGame.length; index++) {
             const element = RankingReward_1.PVPRewardEndGame[index];
-            console.log(bp, element);
+            // console.log(bp, element);
             if (bp < element.MinBP) {
-                console.log('rewards:', index, element.MinBP, element.Rewards);
+                //  console.log('rewards:', index, element.MinBP, element.Rewards);
                 return element.Rewards;
             }
         }

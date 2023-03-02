@@ -88,7 +88,7 @@ class LeaderboardManager {
                 const checkReward = yield this.IsMember(leaderBoardName + 'Rewards', userInfo.UserId);
                 if (!checkReward) {
                     let lastUserScore = yield exports.leaderboardManager.GetUserRank(leaderBoardName, userInfo.UserId, 'DESC');
-                    console.log(lastUserScore);
+                    //  console.log(lastUserScore);
                     if (lastUserScore && lastUserScore.RankNumber !== -1) {
                         let mailRewards = mailManager_1.mailManager.rewardMails.get(catalogType_1.TypeReward.PVP.toString());
                         let endDate = new Date(Date.now() + mailRewards.expiryDate * 86400000);

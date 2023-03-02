@@ -34,8 +34,8 @@ export class PVPRoom extends Room<PVPState> {
   }
 
   onCreate(options: any) {
-    console.log('on create room');
-    this.setSeatReservationTime(300);
+    // console.log('on create room');
+    //   this.setSeatReservationTime(300);
     this.PlayTime = PVPTimerConfig.TimePlay;
 
     this.maxClients = 2;
@@ -119,7 +119,6 @@ export class PVPRoom extends Room<PVPState> {
     });
 
     this.onMessage('SEND_GAME_SCORE', (client, message) => {
-      console.log('SEND_GAME_SCORE', message);
       if (this.gameState == PVPGameState.Playing) {
         this.mapPlayers.get(client.id).Score = message.Score;
         this.mapPlayers.get(client.id).MaxHP = message.MaxHP;
@@ -188,11 +187,6 @@ export class PVPRoom extends Room<PVPState> {
           });
         } else if (this.gameState == PVPGameState.Finish) {
           this.broadcast('END_GAME', this.gameResult);
-        } else {
-          if (this.mapPlayers.get(client.id).Status != 2)
-            client.send('NEED_GAME_START', {
-              NeedSendStart: 1,
-            });
         }
       }
     } catch (e) {
@@ -231,14 +225,13 @@ export class PVPRoom extends Room<PVPState> {
     this.broadcast('PREPARE_PVP', {
       Level: level,
       Time: PVPTimerConfig.TimePlay,
-      Mode: 1,
     });
   }
 
   checkGameCanStart() {
     let startCount = 0;
     this.mapPlayers.forEach((element) => {
-      console.log(element.Status);
+      //   console.log(element.Status);
 
       if (element.Status == 2) startCount++;
     });

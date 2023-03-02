@@ -29,7 +29,7 @@ class PVPRanking {
     }
     setBattlePoint(userId, bp, callback) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(userId, bp);
+            // console.log(userId, bp);
             userService_1.userService.GetBasicInfo(userId, (error, response) => {
                 if (error)
                     return callback(error, null);

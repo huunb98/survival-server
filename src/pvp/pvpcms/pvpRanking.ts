@@ -13,7 +13,7 @@ export class PVPRanking {
   }
 
   async setBattlePoint(userId: string, bp: number, callback: Function) {
-    console.log(userId, bp);
+    // console.log(userId, bp);
     userService.GetBasicInfo(userId, (error, response) => {
       if (error) return callback(error, null);
 

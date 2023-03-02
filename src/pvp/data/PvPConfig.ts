@@ -7,7 +7,7 @@ export enum PVPGameState {
 
 export var PVPTimerConfig = {
   MaxPlayerIngame: 2,
-  TimePlay: 120,
+  TimePlay: 180,
   PrepareTime: 30,
 };
 

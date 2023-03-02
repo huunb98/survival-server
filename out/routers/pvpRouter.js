@@ -50,7 +50,7 @@ PvPRouter.route('/config')
     res.send(config);
 })
     .patch((req, res) => {
-    console.log(req.body);
+    //  console.log(req.body);
     let results = new pvpConfigManager_1.PVPConfigManger().UpdatePVPConfig(req.body.leaderboard, req.body.timePlay);
     res.send(results);
 });

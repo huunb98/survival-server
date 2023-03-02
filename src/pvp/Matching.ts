@@ -2,10 +2,8 @@ import { matchMaker } from 'colyseus';
 
 export default async function MatchingPVP(req, res) {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     //let roomName = req.body.room;
-    let clientVersion = req.body.Version;
-    if (clientVersion == undefined) clientVersion = 0;
     const roomList = await matchMaker.query({ name: 'pvp', locked: false });
 
     let name = 'pvp';

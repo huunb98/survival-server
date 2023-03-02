@@ -13,11 +13,8 @@ const colyseus_1 = require("colyseus");
 function MatchingPVP(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log(req.body);
+            // console.log(req.body);
             //let roomName = req.body.room;
-            let clientVersion = req.body.Version;
-            if (clientVersion == undefined)
-                clientVersion = 0;
             const roomList = yield colyseus_1.matchMaker.query({ name: 'pvp', locked: false });
             let name = 'pvp';
             let action = 2;

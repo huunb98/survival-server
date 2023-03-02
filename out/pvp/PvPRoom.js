@@ -40,8 +40,8 @@ class PVPRoom extends colyseus_1.Room {
         this.listDispose = new rxjs_1.Subscription();
     }
     onCreate(options) {
-        console.log('on create room');
-        this.setSeatReservationTime(300);
+        // console.log('on create room');
+        //   this.setSeatReservationTime(300);
         this.PlayTime = PvPConfig_1.PVPTimerConfig.TimePlay;
         this.maxClients = 2;
         let state = new PVPState();
@@ -114,7 +114,6 @@ class PVPRoom extends colyseus_1.Room {
             //   client.send('READY_PVP', this.mapPlayers.get(client.id));
         });
         this.onMessage('SEND_GAME_SCORE', (client, message) => {
-            console.log('SEND_GAME_SCORE', message);
             if (this.gameState == PvPConfig_1.PVPGameState.Playing) {
                 this.mapPlayers.get(client.id).Score = message.Score;
                 this.mapPlayers.get(client.id).MaxHP = message.MaxHP;
@@ -177,12 +176,6 @@ class PVPRoom extends colyseus_1.Room {
                     else if (this.gameState == PvPConfig_1.PVPGameState.Finish) {
                         this.broadcast('END_GAME', this.gameResult);
                     }
-                    else {
-                        if (this.mapPlayers.get(client.id).Status != 2)
-                            client.send('NEED_GAME_START', {
-                                NeedSendStart: 1,
-                            });
-                    }
                 }
             }
             catch (e) {
@@ -217,13 +210,12 @@ class PVPRoom extends colyseus_1.Room {
         this.broadcast('PREPARE_PVP', {
             Level: level,
             Time: PvPConfig_1.PVPTimerConfig.TimePlay,
-            Mode: 1,
         });
     }
     checkGameCanStart() {
         let startCount = 0;
         this.mapPlayers.forEach((element) => {
-            console.log(element.Status);
+            //   console.log(element.Status);
             if (element.Status == 2)
                 startCount++;
         });
