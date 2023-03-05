@@ -8,6 +8,7 @@ import { IMail, IUserRank, MailStatus, MailType, TypeReward } from '../helpers/c
 import redisUtils from '../helpers/redisUtils';
 import { MAIL_USER } from './mailconfig';
 import { GetMailDetailResponse, GiftResponse } from './mailIO';
+import { runInThisContext } from 'vm';
 
 class MailManager {
   systemMails: Map<string, IMailSystemDocument>;
@@ -15,17 +16,15 @@ class MailManager {
   updateMails: Map<string, INofityDocument>;
   updateMailById: Map<string, INofityDocument>;
 
-  systemId: string[] = [];
+  systemId: string[];
 
-  updateId: string[] = [];
+  updateId: string[];
 
   defaultLanguage: string = LANGUAGE.English;
 
   constructor() {
-    this.systemMails = new Map();
-    this.rewardMails = new Map();
-    this.updateMails = new Map();
-    this.updateMailById = new Map();
+    this.initCache();
+    this.scheduleReloadMail();
   }
 
   /**
@@ -36,6 +35,8 @@ class MailManager {
     try {
       let endDay = new Date();
       endDay.setHours(23, 59, 59, 999);
+
+      this.initCache();
 
       let rewards = await MailRewardModel.find({ isDeleted: false }).exec();
       let systems = await MailSystemModel.find({ isDeleted: false, startDate: { $lt: endDay }, endDate: { $gt: new Date() } }).exec();
@@ -56,11 +57,24 @@ class MailManager {
     }
   }
 
-  scheduleReloadMail() {
+  private scheduleReloadMail() {
     schedule.scheduleJob('0 0 * * *', () => {
       console.log('Running job! ', 'Reload mail');
       this.reloadConfig();
     });
+  }
+
+  /**
+   * Only call on it or clear state
+   */
+
+  private initCache() {
+    this.systemMails = new Map();
+    this.rewardMails = new Map();
+    this.updateMails = new Map();
+    this.updateMailById = new Map();
+    this.systemId = [];
+    this.updateId = [];
   }
 
   reloadConfig() {

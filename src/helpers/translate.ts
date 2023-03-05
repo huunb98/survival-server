@@ -8,7 +8,7 @@ export default class Translate {
         .get(url)
         .then(async (data) => {
           let results = '';
-          for await (const rs of data.data[0]) {
+          for (const rs of data.data[0]) {
             results = results.concat(...rs[0]);
           }
           resolve(results);

@@ -47,13 +47,9 @@ const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
 const mailconfig_1 = require("./mailconfig");
 class MailManager {
     constructor() {
-        this.systemId = [];
-        this.updateId = [];
         this.defaultLanguage = language_1.LANGUAGE.English;
-        this.systemMails = new Map();
-        this.rewardMails = new Map();
-        this.updateMails = new Map();
-        this.updateMailById = new Map();
+        this.initCache();
+        this.scheduleReloadMail();
     }
     /**
      * Reload all mail catching
@@ -63,6 +59,7 @@ class MailManager {
             try {
                 let endDay = new Date();
                 endDay.setHours(23, 59, 59, 999);
+                this.initCache();
                 let rewards = yield mailReward_1.MailRewardModel.find({ isDeleted: false }).exec();
                 let systems = yield mailSystem_1.MailSystemModel.find({ isDeleted: false, startDate: { $lt: endDay }, endDate: { $gt: new Date() } }).exec();
                 let updates = yield mailUpdate_1.MailUpdateModel.find({ isDeleted: false, startDate: { $lt: endDay }, endDate: { $gt: new Date() } }).exec();
@@ -87,6 +84,17 @@ class MailManager {
             console.log('Running job! ', 'Reload mail');
             this.reloadConfig();
         });
+    }
+    /**
+     * Only call on it or clear state
+     */
+    initCache() {
+        this.systemMails = new Map();
+        this.rewardMails = new Map();
+        this.updateMails = new Map();
+        this.updateMailById = new Map();
+        this.systemId = [];
+        this.updateId = [];
     }
     reloadConfig() {
         console.log(`Reload mail at ${new Date()}`);

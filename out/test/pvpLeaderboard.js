@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
 function CreatePVPLeaderBoard() {
-    const leaderboardName = 'JACKALSURVIVAL:PVP6';
+    const leaderboardName = 'JACKALSURVIVAL:PVP7';
     for (let i = 0; i < 20; i++) {
         let user = {
-            DisplayName: makeid(),
+            DisplayName: 'Player#' + makeid(),
             AvatarUrl: randomIntFromInterval(0, 7),
             UserId: makeid(),
         };
@@ -18,6 +18,7 @@ function CreatePVPLeaderBoard() {
         transaction.HMSET(leaderboardName + 'Details', user.UserId, JSON.stringify(user));
         transaction.exec();
     }
+    console.log('create pvp leaderboard done');
 }
 CreatePVPLeaderBoard();
 function randomIntFromInterval(min, max) {
