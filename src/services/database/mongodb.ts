@@ -8,7 +8,7 @@ export class MongoDBDatabase {
     const options: ConnectOptions = {
       dbName: environment.mongo.dbName,
       user: environment.mongo.username,
-      pass: environment.mongo.username,
+      pass: environment.mongo.password,
       keepAlive: true,
     };
 

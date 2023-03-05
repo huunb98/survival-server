@@ -24,7 +24,7 @@ class MongoDBDatabase {
             const options = {
                 dbName: server_1.environment.mongo.dbName,
                 user: server_1.environment.mongo.username,
-                pass: server_1.environment.mongo.username,
+                pass: server_1.environment.mongo.password,
                 keepAlive: true,
             };
             mongoose_1.default.connection.on('error', (err) => {
