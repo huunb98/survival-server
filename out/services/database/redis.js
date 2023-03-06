@@ -29,6 +29,7 @@ const server_1 = require("../../config/environment/server");
 exports.redisClient = redis.createClient({
     host: server_1.environment.redis.host,
     port: server_1.environment.redis.port,
+    password: server_1.environment.redis.pass,
 });
 exports.redisClient.on('error', function (err) {
     console.log('redis went wrong ' + err);
