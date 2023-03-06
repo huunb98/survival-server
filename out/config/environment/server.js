@@ -14,10 +14,10 @@ const environmentDevelop = {
         pass: process.env.REDIS_DEVELOP_PASS,
     },
     mongo: {
-        host: process.env.MONGO_HOST,
-        port: process.env.MONGO_PORT,
-        username: process.env.MONGO_USERNAME,
-        password: process.env.MONGO_PASSWORD,
+        host: process.env.MONGO_DEVELOP_HOST,
+        port: process.env.MONGO_DEVELOP_PORT,
+        username: process.env.MONGO_DEVELOP_USER,
+        password: process.env.MONGO_DEVELOP_PASS,
         dbName: process.env.MONGO_DB,
     },
 };
@@ -32,10 +32,10 @@ const environmentProduct = {
         pass: process.env.REDIS_PRODUCT_PASS,
     },
     mongo: {
-        host: process.env.MONGO_HOST,
-        port: process.env.MONGO_PORT,
-        username: process.env.MONGO_USERNAME,
-        password: process.env.MONGO_PASSWORD,
+        host: process.env.MONGO_PRODUCT_HOST,
+        port: process.env.MONGO_PRODUCT_POSS,
+        username: process.env.MONGO_PRODUCT_USER,
+        password: process.env.MONGO_PRODUCT_PASS,
         dbName: process.env.MONGO_DB,
     },
 };
