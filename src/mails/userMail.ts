@@ -144,8 +144,7 @@ class UserMail {
 
   markMailAsCollected(userId: string, mailId: string, type: MailType, callback: Function) {
     if (type === MailType.Reward) {
-      UserMailListModel.updateMany({ userId: userId, status: MailStatus.NEW }, { $set: { status: MailStatus.READ } })
-        .findOne({ _id: mailId }, { gifts: 1, status: 1 })
+      UserMailListModel.findOne({ _id: mailId }, { gifts: 1, status: 1 })
         .then((data) => {
           if (data) {
             let gift: GiftResponse[] = [];
