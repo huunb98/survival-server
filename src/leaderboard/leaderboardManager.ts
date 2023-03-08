@@ -52,7 +52,7 @@ class LeaderboardManager {
       this.CheckRewardNewSeason(userInfo, leaderboardMode, season);
 
       let userScore = await leaderboardManager.GetUserRank(leaderBoardName, userInfo.UserId, 'DESC');
-      let topUser = await leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19);
+      let topUser = await leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19, false);
 
       fn({
         Status: 1,
@@ -110,9 +110,13 @@ class LeaderboardManager {
     });
   }
 
-  async GetLeaderBoardWithHashDESC(LeaderBoardName: string, from: number, to: number) {
+  async GetLeaderBoardWithHashDESC(LeaderBoardName: string, from: number, to: number, realtime: boolean) {
     return new Promise<any>((resolve, reject) => {
-      if (!this.mapTopRanking.has(LeaderBoardName) || (this.mapTopRanking.has(LeaderBoardName) && Date.now() - this.mapTopRanking.get(LeaderBoardName).TimeLoad > 30000)) {
+      if (
+        realtime ||
+        !this.mapTopRanking.has(LeaderBoardName) ||
+        (this.mapTopRanking.has(LeaderBoardName) && Date.now() - this.mapTopRanking.get(LeaderBoardName).TimeLoad > 30000)
+      ) {
         RedisUtil.redisClient.ZREVRANGE(LeaderBoardName, from, to, 'WITHSCORES', (err, lsMember) => {
           if (!err) {
             let lsUserId = new Array();

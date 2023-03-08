@@ -8,7 +8,7 @@ var PvPRouter = Router();
 
 PvPRouter.route('/leaderboard')
   .get(async function (req: Request, res: Response) {
-    let topPVP = await new PVPRanking().getTopPVP();
+    let topPVP = await new PVPRanking().getTopPVP(true);
     res.send(topPVP);
   })
   .post(check('userId').exists({ checkFalsy: true, checkNull: true }), check('score').isInt(), function (req: Request, res: Response) {
@@ -40,7 +40,6 @@ PvPRouter.route('/config')
     res.send(config);
   })
   .patch((req, res) => {
-    //  console.log(req.body);
     let results = new PVPConfigManger().UpdatePVPConfig(req.body.leaderboard, req.body.timePlay);
     res.send(results);
   });

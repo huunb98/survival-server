@@ -17,7 +17,7 @@ var PvPRouter = (0, express_1.Router)();
 PvPRouter.route('/leaderboard')
     .get(function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        let topPVP = yield new pvpRanking_1.PVPRanking().getTopPVP();
+        let topPVP = yield new pvpRanking_1.PVPRanking().getTopPVP(true);
         res.send(topPVP);
     });
 })
@@ -50,7 +50,6 @@ PvPRouter.route('/config')
     res.send(config);
 })
     .patch((req, res) => {
-    //  console.log(req.body);
     let results = new pvpConfigManager_1.PVPConfigManger().UpdatePVPConfig(req.body.leaderboard, req.body.timePlay);
     res.send(results);
 });

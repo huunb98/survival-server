@@ -83,11 +83,11 @@ export = {
     });
   },
 
-  SetMultiLeaderBoard(key: string, lsKey: string[], lsValue: any[]) {
+  async SetMultiLeaderBoard(key: string, lsKey: string[], lsValue: any[]) {
     let transaction = redisClient.multi();
     for (let i = 0; i < lsKey.length; i++) {
       transaction.HSET(key, lsKey[i], lsValue[i]);
     }
-    transaction.exec();
+    await transaction.exec();
   },
 };

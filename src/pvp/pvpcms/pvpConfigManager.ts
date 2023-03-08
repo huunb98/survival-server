@@ -13,7 +13,7 @@ export class PVPConfigManger {
     };
   }
 
-  UpdatePVPConfig(pvpLeaderboard: ILeaderBoard, timePlay: number) {
+  async UpdatePVPConfig(pvpLeaderboard: ILeaderBoard, timePlay: number) {
     if (timePlay) PVPTimerConfig.TimePlay = timePlay;
     let leaderboard = leaderboardManager.leaderBoardMap.get('PVP');
     if (pvpLeaderboard) {
@@ -25,9 +25,8 @@ export class PVPConfigManger {
       /**
        * Reset schedule leaderboard
        */
-
+      await SetLeaderBoard('PVP', leaderboard);
       leaderboardManager.initLeaderboard();
-      SetLeaderBoard('PVP', leaderboard);
     }
 
     return {

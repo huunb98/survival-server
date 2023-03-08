@@ -20,10 +20,10 @@ class PVPRanking {
     constructor() {
         this.keyPVP = 'JACKALSURVIVAL:PVP';
     }
-    getTopPVP() {
+    getTopPVP(realtime) {
         return __awaiter(this, void 0, void 0, function* () {
             let leaderBoardName = this.keyPVP + leaderboardManager_1.leaderboardManager.leaderBoardMap.get('PVP').Season;
-            let topUser = yield leaderboardManager_1.leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19);
+            let topUser = yield leaderboardManager_1.leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19, realtime);
             return topUser;
         });
     }

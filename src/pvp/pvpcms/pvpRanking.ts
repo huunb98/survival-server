@@ -6,9 +6,9 @@ import { userService } from '../../user/userService';
 
 export class PVPRanking {
   readonly keyPVP = 'JACKALSURVIVAL:PVP';
-  async getTopPVP() {
+  async getTopPVP(realtime: boolean) {
     let leaderBoardName = this.keyPVP + leaderboardManager.leaderBoardMap.get('PVP').Season;
-    let topUser = await leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19);
+    let topUser = await leaderboardManager.GetLeaderBoardWithHashDESC(leaderBoardName, 0, 19, realtime);
     return topUser;
   }
 

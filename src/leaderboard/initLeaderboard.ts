@@ -23,8 +23,8 @@ async function InitLeaderboard(Name: string): Promise<ILeaderBoard> {
   return Promise.resolve(leaderboard);
 }
 
-function SetLeaderBoard(Name: string, leaderboard: ILeaderBoard) {
-  redisUtil.SetMultiLeaderBoard(
+async function SetLeaderBoard(Name: string, leaderboard: ILeaderBoard) {
+  await redisUtil.SetMultiLeaderBoard(
     'JACKALSURVIVAL:LEADERBOARD',
     [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`],
     [leaderboard.Season, leaderboard.SeasonTime, leaderboard.EndSeason.toLocaleString(), leaderboard.NextSeason.toLocaleString()]

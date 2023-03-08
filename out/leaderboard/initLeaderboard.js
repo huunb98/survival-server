@@ -40,7 +40,9 @@ function InitLeaderboard(Name) {
 }
 exports.InitLeaderboard = InitLeaderboard;
 function SetLeaderBoard(Name, leaderboard) {
-    redisUtils_1.default.SetMultiLeaderBoard('JACKALSURVIVAL:LEADERBOARD', [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`], [leaderboard.Season, leaderboard.SeasonTime, leaderboard.EndSeason.toLocaleString(), leaderboard.NextSeason.toLocaleString()]);
+    return __awaiter(this, void 0, void 0, function* () {
+        yield redisUtils_1.default.SetMultiLeaderBoard('JACKALSURVIVAL:LEADERBOARD', [`${Name}_season`, `${Name}_season_time`, `${Name}_end_season`, `${Name}_next_season`], [leaderboard.Season, leaderboard.SeasonTime, leaderboard.EndSeason.toLocaleString(), leaderboard.NextSeason.toLocaleString()]);
+    });
 }
 exports.SetLeaderBoard = SetLeaderBoard;
 function GetMultiLeaderBoardConfig(key, name) {

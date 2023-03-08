@@ -1,7 +1,17 @@
 import mongoose from 'mongoose';
 import RedisClient from '../helpers/redisUtils';
-function CreatePVPLeaderBoard() {
-  const leaderboardName = 'JACKALSURVIVAL:PVP7';
+function getSeason() {
+  return new Promise<number>((resolve, reject) => {
+    RedisClient.redisClient.HGET('JACKALSURVIVAL:LEADERBOARD', 'PVP_season', (error, rs) => {
+      if (error) reject(-1);
+      else resolve(+rs);
+    });
+  });
+}
+async function CreatePVPLeaderBoard() {
+  const currentSeason = await getSeason();
+  console.log(currentSeason);
+  const leaderboardName = 'JACKALSURVIVAL:PVP' + currentSeason;
   for (let i = 0; i < 20; i++) {
     let user = {
       DisplayName: 'Player#' + makeid(),

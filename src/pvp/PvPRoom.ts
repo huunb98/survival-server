@@ -34,7 +34,7 @@ export class PVPRoom extends Room<PVPState> {
   }
 
   onCreate(options: any) {
-    // console.log('on create room');
+    console.log('on create room');
     //   this.setSeatReservationTime(300);
     this.PlayTime = PVPTimerConfig.TimePlay;
 
@@ -302,6 +302,7 @@ export class PVPRoom extends Room<PVPState> {
   }
 
   endGame(PlayerWin: PlayerInfo, PlayerLose: PlayerInfo, isDraw: boolean, winType: WinType) {
+    console.log('end game msg');
     this.gameState = PVPGameState.Finish;
 
     let winELO = PlayerWin.Elo + pvpHelper.GetBPBonus(PlayerWin.Elo, PlayerLose.Elo, true, isDraw);

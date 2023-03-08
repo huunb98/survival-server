@@ -40,7 +40,7 @@ class PVPRoom extends colyseus_1.Room {
         this.listDispose = new rxjs_1.Subscription();
     }
     onCreate(options) {
-        // console.log('on create room');
+        console.log('on create room');
         //   this.setSeatReservationTime(300);
         this.PlayTime = PvPConfig_1.PVPTimerConfig.TimePlay;
         this.maxClients = 2;
@@ -285,6 +285,7 @@ class PVPRoom extends colyseus_1.Room {
         }
     }
     endGame(PlayerWin, PlayerLose, isDraw, winType) {
+        console.log('end game msg');
         this.gameState = PvPConfig_1.PVPGameState.Finish;
         let winELO = PlayerWin.Elo + PvPHelper_1.pvpHelper.GetBPBonus(PlayerWin.Elo, PlayerLose.Elo, true, isDraw);
         let loseELO = PlayerLose.Elo + PvPHelper_1.pvpHelper.GetBPBonus(PlayerLose.Elo, PlayerWin.Elo, false, isDraw);
