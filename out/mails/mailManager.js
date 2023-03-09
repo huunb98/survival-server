@@ -43,7 +43,7 @@ const mailUpdate_1 = require("../models/mailUpdate");
 const schedule = __importStar(require("node-schedule"));
 const usermaillist_1 = require("../models/usermaillist");
 const catalogType_1 = require("../helpers/catalogType");
-const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
+const redisUtils_1 = __importDefault(require("../utils/redisUtils"));
 const mailconfig_1 = require("./mailconfig");
 class MailManager {
     constructor() {
@@ -52,7 +52,7 @@ class MailManager {
         this.scheduleReloadMail();
     }
     /**
-     * Reload all mail catching
+     * Reload all mail caching
      */
     getMailConfig() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -67,11 +67,16 @@ class MailManager {
                 systems.forEach((index) => {
                     this.systemMails.set(index.id, index);
                     this.systemId.push(index.id);
+                    /**
+                     * Set mail expiry
+                     */
+                    redisUtils_1.default.EXPIREAT(mailconfig_1.MAIL_USER + index.id, Math.floor(new Date(index.endDate).getTime() / 1000));
                 });
                 updates.forEach((index) => {
                     this.updateMails.set(index.platform.toString(), index);
                     this.updateMailById.set(index.id, index);
                     this.updateId.push(index.id);
+                    redisUtils_1.default.EXPIREAT(mailconfig_1.MAIL_USER + index.id, Math.floor(new Date(index.endDate).getTime() / 1000));
                 });
             }
             catch (error) {

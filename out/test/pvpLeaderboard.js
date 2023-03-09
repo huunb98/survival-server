@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
+const redisUtils_1 = __importDefault(require("../utils/redisUtils"));
 function getSeason() {
     return new Promise((resolve, reject) => {
         redisUtils_1.default.redisClient.HGET('JACKALSURVIVAL:LEADERBOARD', 'PVP_season', (error, rs) => {

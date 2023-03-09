@@ -21,7 +21,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userMail = void 0;
 const usermaillist_1 = require("../models/usermaillist");
-const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
+const redisUtils_1 = __importDefault(require("../utils/redisUtils"));
 const mailconfig_1 = require("./mailconfig");
 const mailManager_1 = require("./mailManager");
 const catalogType_1 = require("../helpers/catalogType");
@@ -38,7 +38,7 @@ class UserMail {
             }
         });
     }
-    getCatchingStatus(userId) {
+    getCachingStatus(userId) {
         return new Promise((resolve, reject) => {
             redisUtils_1.default.GETMULTIHASHFIELD(mailconfig_1.MAIL_USER, userId, mailManager_1.mailManager.systemId, (error, userStatus) => {
                 if (userStatus) {
@@ -48,6 +48,16 @@ class UserMail {
                     resolve([]);
                     console.log(error);
                 }
+            });
+        });
+    }
+    getCachingValid(userId, lsMail) {
+        return new Promise((resolve, reject) => {
+            redisUtils_1.default.GETMULTIHASHFIELD2(mailconfig_1.MAIL_USER, userId, lsMail, (error, userStatus) => {
+                if (userStatus)
+                    resolve(userStatus);
+                else
+                    resolve([]);
             });
         });
     }

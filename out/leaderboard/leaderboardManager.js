@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.leaderboardManager = void 0;
-const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
+const redisUtils_1 = __importDefault(require("../utils/redisUtils"));
 const initLeaderboard_1 = require("./initLeaderboard");
 const leaderboardResetManager_1 = require("./leaderboardResetManager");
 const catalogType_1 = require("./../helpers/catalogType");

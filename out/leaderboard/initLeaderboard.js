@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SetLeaderBoard = exports.InitLeaderboard = void 0;
 const dateHelper_1 = require("../helpers/dateHelper");
-const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
+const redisUtils_1 = __importDefault(require("../utils/redisUtils"));
 const leaderboard_1 = require("../models/leaderboard");
 function InitLeaderboard(Name) {
     return __awaiter(this, void 0, void 0, function* () {

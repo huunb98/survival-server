@@ -1,4 +1,4 @@
-import RedisUtil from '../helpers/redisUtils';
+import RedisUtil from '../utils/redisUtils';
 import { RequestMsg, RespsoneMsg } from '../io/IOInterface';
 import { ILeaderBoard } from '../models/leaderboard';
 import { UserInfo } from '../user/userInfo';

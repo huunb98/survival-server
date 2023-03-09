@@ -1,7 +1,7 @@
 import { IMailUserDocument, UserMailListModel } from '../models/usermaillist';
-import RedisUtils from '../helpers/redisUtils';
+import RedisUtils from '../utils/redisUtils';
 import { MAIL_USER } from './mailconfig';
-import { GiftResponse, MailCachingStatus, MailSystems, MailUpdates, UserMailList } from './mailIO';
+import { GiftResponse, MailBase, MailCachingStatus, MailCachingStatus2, MailSystems, MailUpdates, UserMailList } from './mailIO';
 import { mailManager } from './mailManager';
 import { MailStatus, MailType, TypeReward } from '../helpers/catalogType';
 import { LANGUAGE } from '../helpers/language';
@@ -17,7 +17,7 @@ class UserMail {
     }
   }
 
-  getCatchingStatus(userId: string) {
+  getCachingStatus(userId: string) {
     return new Promise<MailCachingStatus[]>((resolve, reject) => {
       RedisUtils.GETMULTIHASHFIELD(MAIL_USER, userId, mailManager.systemId, (error: any, userStatus: MailCachingStatus[]) => {
         if (userStatus) {
@@ -26,6 +26,15 @@ class UserMail {
           resolve([]);
           console.log(error);
         }
+      });
+    });
+  }
+
+  getCachingValid(userId: string, lsMail: MailBase[]) {
+    return new Promise<MailCachingStatus2[]>((resolve, reject) => {
+      RedisUtils.GETMULTIHASHFIELD2(MAIL_USER, userId, lsMail, (error: any, userStatus: MailCachingStatus2[]) => {
+        if (userStatus) resolve(userStatus);
+        else resolve([]);
       });
     });
   }

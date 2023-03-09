@@ -1,5 +1,5 @@
 import { dateHelper } from '../helpers/dateHelper';
-import redisUtil from '../helpers/redisUtils';
+import redisUtil from '../utils/redisUtils';
 import { ILeaderBoard } from '../models/leaderboard';
 
 async function InitLeaderboard(Name: string): Promise<ILeaderBoard> {

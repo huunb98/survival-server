@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import RedisClient from '../helpers/redisUtils';
+import RedisClient from '../utils/redisUtils';
 function getSeason() {
   return new Promise<number>((resolve, reject) => {
     RedisClient.redisClient.HGET('JACKALSURVIVAL:LEADERBOARD', 'PVP_season', (error, rs) => {

@@ -5,7 +5,7 @@ import { INofityDocument, MailUpdateModel } from '../models/mailUpdate';
 import * as schedule from 'node-schedule';
 import { IMailUser, UserMailListModel } from '../models/usermaillist';
 import { IMail, IUserRank, MailStatus, MailType, TypeReward } from '../helpers/catalogType';
-import redisUtils from '../helpers/redisUtils';
+import redisUtils from '../utils/redisUtils';
 import { MAIL_USER } from './mailconfig';
 import { GetMailDetailResponse, GiftResponse } from './mailIO';
 import { runInThisContext } from 'vm';
@@ -28,7 +28,7 @@ class MailManager {
   }
 
   /**
-   * Reload all mail catching
+   * Reload all mail caching
    */
 
   private async getMailConfig() {
@@ -46,11 +46,18 @@ class MailManager {
       systems.forEach((index) => {
         this.systemMails.set(index.id, index);
         this.systemId.push(index.id);
+
+        /**
+         * Set mail expiry
+         */
+        redisUtils.EXPIREAT(MAIL_USER + index.id, Math.floor(new Date(index.endDate).getTime() / 1000));
       });
       updates.forEach((index) => {
         this.updateMails.set(index.platform.toString(), index);
         this.updateMailById.set(index.id, index);
         this.updateId.push(index.id);
+
+        redisUtils.EXPIREAT(MAIL_USER + index.id, Math.floor(new Date(index.endDate).getTime() / 1000));
       });
     } catch (error) {
       console.log(error);

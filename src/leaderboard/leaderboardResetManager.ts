@@ -1,7 +1,7 @@
 import { ILeaderBoard } from '../models/leaderboard';
 import schedule from 'node-schedule';
 import { leaderboardManager } from './leaderboardManager';
-import RedisUtil from '../helpers/redisUtils';
+import RedisUtil from '../utils/redisUtils';
 
 export class LeaderBoardResetManager {
   leaderBoard: ILeaderBoard;

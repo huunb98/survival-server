@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LeaderBoardResetManager = void 0;
 const node_schedule_1 = __importDefault(require("node-schedule"));
 const leaderboardManager_1 = require("./leaderboardManager");
-const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
+const redisUtils_1 = __importDefault(require("../utils/redisUtils"));
 class LeaderBoardResetManager {
     constructor(leaderBoard) {
         this.leaderBoard = leaderBoard;

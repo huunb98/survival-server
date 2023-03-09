@@ -1,5 +1,5 @@
 import { PvPDataDetails } from '../../helpers/catalogType';
-import RedisUtil from '../../helpers/redisUtils';
+import RedisUtil from '../../utils/redisUtils';
 import { leaderboardManager } from '../../leaderboard/leaderboardManager';
 import { UserModel } from '../../models/user';
 import { userService } from '../../user/userService';

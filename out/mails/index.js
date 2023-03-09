@@ -17,7 +17,7 @@ const userMail_1 = require("./userMail");
 const catalogType_1 = require("../helpers/catalogType");
 const Cmd_1 = require("../helpers/Cmd");
 const language_1 = require("../helpers/language");
-const redisUtils_1 = __importDefault(require("../helpers/redisUtils"));
+const redisUtils_1 = __importDefault(require("../utils/redisUtils"));
 const mailconfig_1 = require("./mailconfig");
 const mailManager_1 = require("./mailManager");
 class MailController {
@@ -39,9 +39,9 @@ class MailController {
                 case Cmd_1.CmdId.DeleteMail:
                     this.deleteMail(userInfo, msg, callback);
                     break;
-                case Cmd_1.CmdId.MarkAllAsRead:
-                    this.readAllMail(userInfo, msg, callback);
-                    break;
+                // case CmdId.MarkAllAsRead:
+                //   this.readAllMail(userInfo, msg, callback);
+                //   break;
                 case Cmd_1.CmdId.MarkAllAsCollect:
                     this.claimAllMail(userInfo, msg, callback);
                     break;
@@ -58,7 +58,7 @@ class MailController {
      */
     getMailList(userInfo, callback) {
         return __awaiter(this, void 0, void 0, function* () {
-            let listStatus = yield userMail_1.userMail.getCatchingStatus(userInfo.UserId);
+            let listStatus = yield userMail_1.userMail.getCachingStatus(userInfo.UserId);
             //  console.log(listStatus);
             let lsValidMail = this.checkMailValid(listStatus, userInfo.CountryCode, userInfo.Platform);
             let mailUpdate = yield this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
@@ -168,28 +168,24 @@ class MailController {
             });
         });
     }
-    readAllMail(userInfo, msg, callback) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let lsMailStatus = yield userMail_1.userMail.getCatchingStatus(userInfo.UserId);
-            let mailUpdate = yield this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
-            lsMailStatus.forEach((mail) => {
-                var _a;
-                if (mail.status === catalogType_1.MailStatus.NEW) {
-                    let startDate = (_a = mailManager_1.mailManager.systemMails.get(mail.mailId)) === null || _a === void 0 ? void 0 : _a.startDate;
-                    if (startDate && new Date(startDate) < new Date())
-                        userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mail.mailId, catalogType_1.MailStatus.READ);
-                }
-            });
-            if (mailUpdate && mailUpdate.status === catalogType_1.MailStatus.NEW) {
-                userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailUpdate.data.id, catalogType_1.MailStatus.READ);
-            }
-            userMail_1.userMail.markAllMailAsRead(userInfo.UserId);
-            callback({
-                Status: 1,
-                Body: {},
-            });
-        });
-    }
+    // async readAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+    //   let lsMailStatus: MailCachingStatus[] = await userMail.getCachingStatus(userInfo.UserId);
+    //   let mailUpdate = await this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
+    //   lsMailStatus.forEach((mail) => {
+    //     if (mail.status === MailStatus.NEW) {
+    //       let startDate = mailManager.systemMails.get(mail.mailId)?.startDate;
+    //       if (startDate && new Date(startDate) < new Date()) userMail.changeStatusMailSystem(userInfo.UserId, mail.mailId, MailStatus.READ);
+    //     }
+    //   });
+    //   if (mailUpdate && mailUpdate.status === MailStatus.NEW) {
+    //     userMail.changeStatusMailSystem(userInfo.UserId, mailUpdate.data.id, MailStatus.READ);
+    //   }
+    //   userMail.markAllMailAsRead(userInfo.UserId);
+    //   callback({
+    //     Status: 1,
+    //     Body: {},
+    //   });
+    // }
     claimMail(userInfo, msg, callback) {
         return __awaiter(this, void 0, void 0, function* () {
             userMail_1.userMail.markMailAsCollected(userInfo.UserId, msg.Body.MailId, msg.Body.Type, (response) => {
@@ -213,7 +209,8 @@ class MailController {
     claimAllMail(userInfo, msg, callback) {
         return __awaiter(this, void 0, void 0, function* () {
             let listGiftSystem = [];
-            let listStatus = yield userMail_1.userMail.getCatchingStatus(userInfo.UserId);
+            let mails = msg.Body.Mails;
+            let listStatus = yield userMail_1.userMail.getCachingValid(userInfo.UserId, mails);
             listStatus.forEach((index) => {
                 if (index.status !== catalogType_1.MailStatus.DELETED && index.status !== catalogType_1.MailStatus.COLLECTED) {
                     let mailSystemActive = mailManager_1.mailManager.systemMails.get(index.mailId);
@@ -245,16 +242,12 @@ class MailController {
     }
     deleteAllMail(userInfo, msg, callback) {
         return __awaiter(this, void 0, void 0, function* () {
-            mailManager_1.mailManager.systemId.forEach((mailId) => {
-                let startDate = mailManager_1.mailManager.systemMails.get(mailId).startDate;
+            let mails = msg.Body.Mails;
+            let listStatus = yield userMail_1.userMail.getCachingValid(userInfo.UserId, mails);
+            listStatus.forEach((index) => {
+                let startDate = index.type === catalogType_1.MailType.System ? mailManager_1.mailManager.systemMails.get(index.mailId).startDate : mailManager_1.mailManager.updateMails.get(index.mailId).startDate;
                 if (startDate && new Date(startDate) < new Date()) {
-                    userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailId, catalogType_1.MailStatus.DELETED);
-                }
-            });
-            mailManager_1.mailManager.updateId.forEach((mailId) => {
-                let startDate = mailManager_1.mailManager.updateMails.get(mailId).startDate;
-                if (startDate && new Date(startDate) < new Date()) {
-                    userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, mailId, catalogType_1.MailStatus.DELETED);
+                    userMail_1.userMail.changeStatusMailSystem(userInfo.UserId, index.mailId, catalogType_1.MailStatus.DELETED);
                 }
             });
             userMail_1.userMail.deleteAllMail(userInfo.UserId);

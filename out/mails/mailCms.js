@@ -21,7 +21,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const catalogType_1 = require("../helpers/catalogType");
 const language_1 = require("../helpers/language");
-const translate_1 = __importDefault(require("../helpers/translate"));
+const translate_1 = __importDefault(require("../utils/translate"));
 const mailUpdate_1 = require("../models/mailUpdate");
 const mailReward_1 = require("../models/mailReward");
 const mailSystem_1 = require("../models/mailSystem");

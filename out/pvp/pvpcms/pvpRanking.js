@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PVPRanking = void 0;
-const redisUtils_1 = __importDefault(require("../../helpers/redisUtils"));
+const redisUtils_1 = __importDefault(require("../../utils/redisUtils"));
 const leaderboardManager_1 = require("../../leaderboard/leaderboardManager");
 const userService_1 = require("../../user/userService");
 class PVPRanking {

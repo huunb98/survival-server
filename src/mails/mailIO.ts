@@ -1,4 +1,4 @@
-import { MailStatus, MailType } from '../helpers/catalogType';
+import { MailStatus, MailType, TypeReward } from '../helpers/catalogType';
 import { IMailSystemDocument } from '../models/mailSystem';
 import { INofityDocument } from '../models/mailUpdate';
 
@@ -13,6 +13,11 @@ export interface MailCachingStatus {
   mailId: string;
   status: MailStatus;
 }
+
+export interface MailCachingStatus2 extends MailCachingStatus {
+  type: MailType;
+}
+
 export interface MailSystems {
   data: IMailSystemDocument;
   status: MailStatus;
@@ -36,4 +41,9 @@ export interface GetMailDetailResponse {
   timeEnd: Number;
   gifts: GiftResponse[];
   type: MailType;
+}
+
+export class MailBase {
+  MailId: string;
+  Type: MailType;
 }

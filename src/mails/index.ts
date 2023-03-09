@@ -1,14 +1,14 @@
 import { IPVersion } from 'net';
 import { userMail } from './userMail';
-import { IPlatform, MailStatus } from '../helpers/catalogType';
+import { IPlatform, MailStatus, MailType } from '../helpers/catalogType';
 import { CmdId } from '../helpers/Cmd';
 import { COUNTRY_LANGUAGE, LANGUAGE } from '../helpers/language';
-import redisUtils from '../helpers/redisUtils';
+import redisUtils from '../utils/redisUtils';
 import { RequestMsg, RespsoneMsg } from '../io/IOInterface';
 import { IMailSystemDocument } from '../models/mailSystem';
 import { UserInfo } from '../user/userInfo';
 import { MAIL_USER } from './mailconfig';
-import { GiftResponse, MailCachingStatus, MailSystems, MailUpdates, UserMailList } from './mailIO';
+import { GiftResponse, MailBase, MailCachingStatus, MailCachingStatus2, MailSystems, MailUpdates, UserMailList } from './mailIO';
 import { mailManager } from './mailManager';
 
 class MailController {
@@ -29,9 +29,9 @@ class MailController {
       case CmdId.DeleteMail:
         this.deleteMail(userInfo, msg, callback);
         break;
-      case CmdId.MarkAllAsRead:
-        this.readAllMail(userInfo, msg, callback);
-        break;
+      // case CmdId.MarkAllAsRead:
+      //   this.readAllMail(userInfo, msg, callback);
+      //   break;
       case CmdId.MarkAllAsCollect:
         this.claimAllMail(userInfo, msg, callback);
         break;
@@ -46,7 +46,7 @@ class MailController {
    * @param {UserMailList[]} callback
    */
   async getMailList(userInfo: UserInfo, callback: (res: RespsoneMsg) => void) {
-    let listStatus: MailCachingStatus[] = await userMail.getCatchingStatus(userInfo.UserId);
+    let listStatus: MailCachingStatus[] = await userMail.getCachingStatus(userInfo.UserId);
 
     //  console.log(listStatus);
 
@@ -166,27 +166,27 @@ class MailController {
     });
   }
 
-  async readAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
-    let lsMailStatus: MailCachingStatus[] = await userMail.getCatchingStatus(userInfo.UserId);
-    let mailUpdate = await this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
+  // async readAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
+  //   let lsMailStatus: MailCachingStatus[] = await userMail.getCachingStatus(userInfo.UserId);
+  //   let mailUpdate = await this.checkMailUpdate(userInfo.UserId, userInfo.Platform, userInfo.AppVersion, userInfo.CreatedAt);
 
-    lsMailStatus.forEach((mail) => {
-      if (mail.status === MailStatus.NEW) {
-        let startDate = mailManager.systemMails.get(mail.mailId)?.startDate;
+  //   lsMailStatus.forEach((mail) => {
+  //     if (mail.status === MailStatus.NEW) {
+  //       let startDate = mailManager.systemMails.get(mail.mailId)?.startDate;
 
-        if (startDate && new Date(startDate) < new Date()) userMail.changeStatusMailSystem(userInfo.UserId, mail.mailId, MailStatus.READ);
-      }
-    });
-    if (mailUpdate && mailUpdate.status === MailStatus.NEW) {
-      userMail.changeStatusMailSystem(userInfo.UserId, mailUpdate.data.id, MailStatus.READ);
-    }
-    userMail.markAllMailAsRead(userInfo.UserId);
+  //       if (startDate && new Date(startDate) < new Date()) userMail.changeStatusMailSystem(userInfo.UserId, mail.mailId, MailStatus.READ);
+  //     }
+  //   });
+  //   if (mailUpdate && mailUpdate.status === MailStatus.NEW) {
+  //     userMail.changeStatusMailSystem(userInfo.UserId, mailUpdate.data.id, MailStatus.READ);
+  //   }
+  //   userMail.markAllMailAsRead(userInfo.UserId);
 
-    callback({
-      Status: 1,
-      Body: {},
-    });
-  }
+  //   callback({
+  //     Status: 1,
+  //     Body: {},
+  //   });
+  // }
 
   async claimMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
     userMail.markMailAsCollected(userInfo.UserId, msg.Body.MailId, msg.Body.Type, (response) => {
@@ -209,7 +209,10 @@ class MailController {
   async claimAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
     let listGiftSystem: GiftResponse[] = [];
 
-    let listStatus: MailCachingStatus[] = await userMail.getCatchingStatus(userInfo.UserId);
+    let mails: MailBase[] = msg.Body.Mails;
+
+    let listStatus: MailCachingStatus2[] = await userMail.getCachingValid(userInfo.UserId, mails);
+
     listStatus.forEach((index) => {
       if (index.status !== MailStatus.DELETED && index.status !== MailStatus.COLLECTED) {
         let mailSystemActive = mailManager.systemMails.get(index.mailId);
@@ -242,19 +245,16 @@ class MailController {
   }
 
   async deleteAllMail(userInfo: UserInfo, msg: RequestMsg, callback: (res: RespsoneMsg) => void) {
-    mailManager.systemId.forEach((mailId) => {
-      let startDate = mailManager.systemMails.get(mailId).startDate;
+    let mails: MailBase[] = msg.Body.Mails;
+    let listStatus: MailCachingStatus2[] = await userMail.getCachingValid(userInfo.UserId, mails);
+
+    listStatus.forEach((index) => {
+      let startDate = index.type === MailType.System ? mailManager.systemMails.get(index.mailId).startDate : mailManager.updateMails.get(index.mailId).startDate;
       if (startDate && new Date(startDate) < new Date()) {
-        userMail.changeStatusMailSystem(userInfo.UserId, mailId, MailStatus.DELETED);
+        userMail.changeStatusMailSystem(userInfo.UserId, index.mailId, MailStatus.DELETED);
       }
     });
 
-    mailManager.updateId.forEach((mailId) => {
-      let startDate = mailManager.updateMails.get(mailId).startDate;
-      if (startDate && new Date(startDate) < new Date()) {
-        userMail.changeStatusMailSystem(userInfo.UserId, mailId, MailStatus.DELETED);
-      }
-    });
     userMail.deleteAllMail(userInfo.UserId);
 
     callback({

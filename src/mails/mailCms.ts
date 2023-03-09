@@ -1,6 +1,6 @@
 import { IMail, IPlatform, MailRewardResult, MailSystemResult, MailType, MailUpdateResult, TypeReward } from '../helpers/catalogType';
 import { LANGUAGE, LANGUAGE_TRANSLATE } from '../helpers/language';
-import Translate from '../helpers/translate';
+import Translate from '../utils/translate';
 import { MailUpdateModel } from '../models/mailUpdate';
 import { MailRewardModel } from '../models/mailReward';
 import { MailSystemModel } from '../models/mailSystem';

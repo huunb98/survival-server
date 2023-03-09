@@ -1,3 +1,4 @@
+import { MailBase } from '../mails/mailIO';
 import { redisClient } from '../services/database/redis';
 
 export = {
@@ -52,6 +53,36 @@ export = {
             statusMails.push({
               mailId: mailId[i],
               status: 0, // status new mails
+            });
+          }
+        }
+        callback('', statusMails);
+      } else {
+        callback(err, '');
+      }
+    });
+  },
+
+  GETMULTIHASHFIELD2: function (key: string, member: string, mailId: MailBase[], callback: any) {
+    let transactions = redisClient.multi();
+    mailId.forEach((id) => {
+      transactions.HGET(key + id, member);
+    });
+    transactions.exec((err, rs) => {
+      if (rs) {
+        let statusMails = new Array();
+        for (let i = 0; i < rs.length; i++) {
+          if (rs[i]) {
+            statusMails.push({
+              mailId: mailId[i].MailId,
+              status: Number(rs[i]),
+              type: mailId[i].Type,
+            });
+          } else {
+            statusMails.push({
+              mailId: mailId[i].MailId,
+              status: 0, // status new mails
+              type: mailId[i].Type,
             });
           }
         }
