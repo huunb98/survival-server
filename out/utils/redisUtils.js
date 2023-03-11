@@ -77,7 +77,7 @@ module.exports = {
     GETMULTIHASHFIELD2: function (key, member, mailId, callback) {
         let transactions = redis_1.redisClient.multi();
         mailId.forEach((id) => {
-            transactions.HGET(key + id, member);
+            transactions.HGET(key + id.MailId, member);
         });
         transactions.exec((err, rs) => {
             if (rs) {
