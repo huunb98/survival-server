@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node ./out/index.js",
     "dev": "tsnd --respawn ./src/index.ts",
-    "build": "tsc -p .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsnd --respawn ./src/test/pvpLeaderboard.ts",
+    "build": "tsc -p ."
   },
   "keywords": [],
   "author": "HuuNB",

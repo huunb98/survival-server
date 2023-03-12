@@ -15,7 +15,7 @@ exports.PVPTimerConfig = {
 };
 exports.PVP_MatchMarker = {
     ReloadMakingTime: 5,
-    MMAtackRange: 200,
+    MMAtackRange: 300,
     AtkRange: 0.5,
 };
 var WinType;

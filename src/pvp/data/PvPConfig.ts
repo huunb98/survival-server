@@ -13,7 +13,7 @@ export var PVPTimerConfig = {
 
 export var PVP_MatchMarker = {
   ReloadMakingTime: 5,
-  MMAtackRange: 200,
+  MMAtackRange: 300,
   AtkRange: 0.5,
 };
 
