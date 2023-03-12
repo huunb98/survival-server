@@ -13,7 +13,7 @@ const colyseus_1 = require("colyseus");
 /**
  * Check elo and atk valid for metadata of room pvp
  *
- * Room created after 20s, battle point range max +/- 800
+ * Room created after 20s, battle point range max +/- 1200
  * Atk range +/- 50%
  * @param elo
  * @param atk

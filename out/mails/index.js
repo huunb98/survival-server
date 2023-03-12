@@ -106,12 +106,20 @@ class MailController {
             else if (appVersion >= mailUpdate.minVersion && appVersion < mailUpdate.version) {
                 return new Promise((resolve, reject) => {
                     redisUtils_1.default.HGET(mailconfig_1.MAIL_USER + mailUpdate.id, userId, (error, status) => {
-                        if (status && status === catalogType_1.MailStatus.DELETED)
-                            return resolve(null);
-                        resolve({
-                            data: mailUpdate,
-                            status: catalogType_1.MailStatus.NEW,
-                        });
+                        if (status) {
+                            if (status === catalogType_1.MailStatus.DELETED)
+                                return resolve(null);
+                            else
+                                resolve({
+                                    data: mailUpdate,
+                                    status: status,
+                                });
+                        }
+                        else
+                            resolve({
+                                data: mailUpdate,
+                                status: catalogType_1.MailStatus.NEW,
+                            });
                     });
                 });
             }
