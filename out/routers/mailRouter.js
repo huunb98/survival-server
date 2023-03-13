@@ -211,10 +211,7 @@ MailRouter.post('/sendToUser', (0, express_validator_1.check)('userId').exists({
 });
 MailRouter.post('/reloadConfig', (req, res) => {
     mailManager_1.mailManager.reloadConfig();
-    res.send({
-        Status: 1,
-        Body: {},
-    });
+    res.send('ok');
 });
 exports.default = MailRouter;
 //# sourceMappingURL=mailRouter.js.map

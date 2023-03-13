@@ -258,10 +258,7 @@ MailRouter.post(
 
 MailRouter.post('/reloadConfig', (req, res) => {
   mailManager.reloadConfig();
-  res.send({
-    Status: 1,
-    Body: {},
-  });
+  res.send('ok');
 });
 
 export default MailRouter;
