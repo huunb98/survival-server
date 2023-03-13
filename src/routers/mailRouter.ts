@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { check, validationResult } from 'express-validator';
 import { version } from 'os';
+import { TypeReward } from '../helpers/catalogType';
 import MailCMS from '../mails/mailCms';
 import { mailManager } from '../mails/mailManager';
 
@@ -40,15 +41,7 @@ MailRouter.route('/mailSystem')
           giftError = true;
         }
       } else gifts = null;
-      if (errorList.length || giftError) {
-        res.send({
-          Status: 0,
-          Body: {
-            Err: 'Invalid parameter',
-          },
-        });
-        return;
-      }
+      if (errorList.length || giftError) return res.status(400).send('Invalid parameter');
 
       const { title, content, sender, platform, countryCode, startDate, endDate } = req.body;
       new MailCMS().createMailSystem(title, content, sender, gifts, platform, countryCode, startDate, endDate, (error: string, response: string) => {
@@ -67,15 +60,7 @@ MailRouter.route('/mailSystem')
       let error = validationResult(req);
       let errorList = error.array();
 
-      if (errorList.length) {
-        res.send({
-          Status: 0,
-          Body: {
-            Err: 'Invalid parameter',
-          },
-        });
-        return;
-      }
+      if (errorList.length) return res.status(400).send('Invalid parameter');
       const { mailId, sender, language, title, content, gifts, platform, countryCode, startDate, endDate, isActive } = req.body;
 
       new MailCMS().updateMailSystem(mailId, language, title, content, sender, gifts, platform, countryCode, startDate, endDate, isActive, (error, response) => {
@@ -121,15 +106,7 @@ MailRouter.route('/mailUpdate')
           giftError = true;
         }
       } else gifts = null;
-      if (errorList.length || giftError) {
-        res.send({
-          Status: 0,
-          Body: {
-            Err: 'Invalid parameter',
-          },
-        });
-        return;
-      }
+      if (errorList.length || giftError) return res.status(400).send('Invalid parameter');
 
       const { title, content, platform, version, minVersion, startDate, endDate } = req.body;
       new MailCMS().createMailUpdate(title, content, gifts, version, minVersion, platform, startDate, endDate, (error: string, response: string) => {
@@ -148,15 +125,7 @@ MailRouter.route('/mailUpdate')
       let error = validationResult(req);
       let errorList = error.array();
 
-      if (errorList.length) {
-        res.send({
-          Status: 0,
-          Body: {
-            Err: 'Invalid parameter',
-          },
-        });
-        return;
-      }
+      if (errorList.length) return res.status(400).send('Invalid parameter');
       const { mailId, language, title, content, gifts, platform, version, minVersion, startDate, endDate, isActive } = req.body;
 
       new MailCMS().updateMailNotifyUpdate(mailId, language, title, content, gifts, version, minVersion, platform, startDate, endDate, isActive, (error, response) => {
@@ -203,15 +172,7 @@ MailRouter.route('/mailReward')
           giftError = true;
         }
       } else gifts = null;
-      if (errorList.length || giftError) {
-        res.send({
-          Status: 0,
-          Body: {
-            Err: 'Invalid parameter',
-          },
-        });
-        return;
-      }
+      if (errorList.length || giftError) return res.status(400).send('Invalid parameter');
 
       const { sender, title, content, type, expiryDate } = req.body;
       new MailCMS().createMailReward(title, content, sender, type, gifts, expiryDate, (error: string, response: string) => {
@@ -230,15 +191,7 @@ MailRouter.route('/mailReward')
       let error = validationResult(req);
       let errorList = error.array();
 
-      if (errorList.length) {
-        res.send({
-          Status: 0,
-          Body: {
-            Err: 'Invalid parameter',
-          },
-        });
-        return;
-      }
+      if (errorList.length) return res.status(400).send('Invalid parameter');
       const { mailId, language, title, content, gifts, platform, version, minVersion, startDate, endDate, isActive } = req.body;
 
       new MailCMS().updateMailNotifyUpdate(mailId, language, title, content, gifts, version, minVersion, platform, startDate, endDate, isActive, (error, response) => {
@@ -267,6 +220,38 @@ MailRouter.post(
       }
 
       res.send(response);
+    });
+  }
+);
+
+MailRouter.post(
+  '/sendToUser',
+  check('userId').exists({ checkFalsy: true, checkNull: true }).isLength({ min: 24, max: 24 }),
+  check('title').exists({ checkNull: true }),
+  check('content').exists({ checkNull: true }),
+  check('endDate').exists({ checkNull: true }),
+  (req, res) => {
+    let error = validationResult(req);
+    let errorList = error.array();
+
+    let giftError = false;
+    let gifts: Map<string, number> = new Map();
+    // console.log(req.body);
+    if (req.body.gifts) {
+      gifts = req.body.gifts;
+      if (typeof gifts != 'object') {
+        giftError = true;
+      }
+    } else gifts = null;
+    if (errorList.length || giftError) {
+      res.status(400).send(error);
+      return;
+    }
+    const { userId, title, content, endDate } = req.body;
+    mailManager.sendRewardToUser(userId, TypeReward.AdminPush, title, content, gifts, null, null, endDate, (error, results) => {
+      if (error) return res.status(400).send('Send to user error');
+
+      res.send('Send mail to user succeed');
     });
   }
 );

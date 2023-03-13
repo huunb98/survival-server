@@ -281,12 +281,16 @@ class MailManager {
             });
         });
     }
-    sendRewardToUser(userId, typeReward, gifts, userRank, season, endDate, callback) {
+    sendRewardToUser(userId, typeReward, title, content, gifts, userRank, season, endDate, callback) {
         return __awaiter(this, void 0, void 0, function* () {
             let userMail = new usermaillist_1.UserMailListModel();
             userMail.userId = userId;
             userMail.type = typeReward;
             userMail.validTo = endDate;
+            if (title)
+                userMail.title = title;
+            if (content)
+                userMail.content = content;
             if (userRank) {
                 userMail.content = JSON.stringify({
                     Season: season,

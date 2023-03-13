@@ -93,7 +93,7 @@ class LeaderboardManager {
                         let mailRewards = mailManager_1.mailManager.rewardMails.get(catalogType_1.TypeReward.PVP.toString());
                         let endDate = new Date(Date.now() + mailRewards.expiryDate * 86400000);
                         let gifts = PvPHelper_1.pvpHelper.GetRewardSeason(lastUserScore.RankNumber);
-                        mailManager_1.mailManager.sendRewardToUser(userInfo.UserId, catalogType_1.TypeReward.PVP, gifts, lastUserScore, season, endDate, (error, response) => {
+                        mailManager_1.mailManager.sendRewardToUser(userInfo.UserId, catalogType_1.TypeReward.PVP, null, null, gifts, lastUserScore, season, endDate, (error, response) => {
                             if (response)
                                 redisUtils_1.default.redisClient.SADD(leaderBoardName + 'Rewards', userInfo.UserId);
                         });

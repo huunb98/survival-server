@@ -247,11 +247,14 @@ class MailManager {
       });
   }
 
-  async sendRewardToUser(userId: string, typeReward: TypeReward, gifts, userRank: IUserRank, season: number, endDate: Date, callback: Function) {
+  async sendRewardToUser(userId: string, typeReward: TypeReward, title: string, content: string, gifts, userRank: IUserRank, season: number, endDate: Date, callback: Function) {
     let userMail = new UserMailListModel();
     userMail.userId = userId;
     userMail.type = typeReward;
     userMail.validTo = endDate;
+
+    if (title) userMail.title = title;
+    if (content) userMail.content = content;
     if (userRank) {
       userMail.content = JSON.stringify({
         Season: season,

@@ -219,9 +219,8 @@ class MailController {
     let mails: MailBase[] = msg.Body.Mails;
 
     let listStatus: MailCachingStatus2[] = await userMail.getCachingValid(userInfo.UserId, mails);
-
     listStatus.forEach((index) => {
-      if (index.status !== MailStatus.DELETED && index.status !== MailStatus.COLLECTED) {
+      if (index.status !== MailStatus.DELETED && index.status !== MailStatus.COLLECTED && index.type === MailType.System) {
         let mailSystemActive = mailManager.systemMails.get(index.mailId);
         let giftSys = mailSystemActive.gifts;
         let startDate = mailSystemActive.startDate;
