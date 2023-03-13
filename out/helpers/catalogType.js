@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MailUpdateResult = exports.MailRewardResult = exports.MailSystemResult = exports.MailType = exports.UserRole = exports.TypeReward = exports.MailStatus = exports.IPlatform = void 0;
+exports.UserRoleCms = exports.MailUpdateResult = exports.MailRewardResult = exports.MailSystemResult = exports.MailType = exports.UserRole = exports.TypeReward = exports.MailStatus = exports.IPlatform = void 0;
 var IPlatform;
 (function (IPlatform) {
     IPlatform[IPlatform["Android"] = 0] = "Android";
@@ -41,4 +41,14 @@ exports.MailRewardResult = MailRewardResult;
 class MailUpdateResult {
 }
 exports.MailUpdateResult = MailUpdateResult;
-//# sourceMappingURL=CatalogType.js.map
+/**
+ * CMS
+ */
+var UserRoleCms;
+(function (UserRoleCms) {
+    UserRoleCms[UserRoleCms["NotExist"] = 0] = "NotExist";
+    UserRoleCms[UserRoleCms["Member"] = 1] = "Member";
+    UserRoleCms[UserRoleCms["Admin"] = 2] = "Admin";
+    UserRoleCms[UserRoleCms["Root"] = 3] = "Root";
+})(UserRoleCms = exports.UserRoleCms || (exports.UserRoleCms = {}));
+//# sourceMappingURL=catalogType.js.map

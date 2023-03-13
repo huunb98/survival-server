@@ -142,7 +142,7 @@ class MailManager {
                     }
                     let timeEnd = new Date(mailUser.validTo).getTime();
                     let mailDetails = {
-                        sender: 'Jackal Squad Team',
+                        sender: 'Survivor Team',
                         status: mailUser.status,
                         title: '',
                         content: '',
@@ -247,7 +247,7 @@ class MailManager {
             let gifts = [];
             if (mail) {
                 let mailDetails = {
-                    sender: 'System Team',
+                    sender: 'Survivor Team',
                     status: status,
                     title: mail.title,
                     content: mail.content,

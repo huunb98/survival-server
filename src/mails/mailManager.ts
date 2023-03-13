@@ -118,7 +118,7 @@ class MailManager {
           }
           let timeEnd = new Date(mailUser.validTo).getTime();
           let mailDetails: GetMailDetailResponse = {
-            sender: 'Jackal Squad Team',
+            sender: 'Survivor Team',
             status: mailUser.status,
             title: '',
             content: '',
@@ -216,7 +216,7 @@ class MailManager {
     let gifts: GiftResponse[] = [];
     if (mail) {
       let mailDetails: GetMailDetailResponse = {
-        sender: 'System Team',
+        sender: 'Survivor Team',
         status: status,
         title: mail.title,
         content: mail.content,
