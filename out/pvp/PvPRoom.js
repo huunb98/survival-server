@@ -133,6 +133,7 @@ class PVPRoom extends colyseus_1.Room {
         });
         this.onMessage('ATTACK_SKILL', (client, message) => {
             if (this.gameState == PvPConfig_1.PVPGameState.Playing) {
+                console.log('on msg attack', message.Type);
                 // if (this.gameState != SurvivalGameState.Finish) {
                 this.broadcast('ATTACK_SKILL', {}, {
                     except: client,

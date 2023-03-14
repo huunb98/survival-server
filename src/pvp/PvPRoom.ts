@@ -141,6 +141,7 @@ export class PVPRoom extends Room<PVPState> {
 
     this.onMessage('ATTACK_SKILL', (client, message) => {
       if (this.gameState == PVPGameState.Playing) {
+        console.log('on msg attack', message.Type);
         // if (this.gameState != SurvivalGameState.Finish) {
         this.broadcast(
           'ATTACK_SKILL',
