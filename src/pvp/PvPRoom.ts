@@ -139,6 +139,20 @@ export class PVPRoom extends Room<PVPState> {
       }
     });
 
+    this.onMessage('ATTACK_SKILL', (client, message) => {
+      if (this.gameState == PVPGameState.Playing) {
+        // if (this.gameState != SurvivalGameState.Finish) {
+        this.broadcast(
+          'ATTACK_SKILL',
+          {},
+          {
+            except: client,
+          }
+        );
+        //SendScore cuối game
+      }
+    });
+
     this.onMessage('PLAYER_DIE', (client, message) => {
       if (this.gameState == PVPGameState.Playing) {
         // if (this.gameState != SurvivalGameState.Finish) {

@@ -131,6 +131,15 @@ class PVPRoom extends colyseus_1.Room {
                 });
             }
         });
+        this.onMessage('ATTACK_SKILL', (client, message) => {
+            if (this.gameState == PvPConfig_1.PVPGameState.Playing) {
+                // if (this.gameState != SurvivalGameState.Finish) {
+                this.broadcast('ATTACK_SKILL', {}, {
+                    except: client,
+                });
+                //SendScore cuối game
+            }
+        });
         this.onMessage('PLAYER_DIE', (client, message) => {
             if (this.gameState == PvPConfig_1.PVPGameState.Playing) {
                 // if (this.gameState != SurvivalGameState.Finish) {
